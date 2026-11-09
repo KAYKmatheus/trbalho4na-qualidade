@@ -11,6 +11,8 @@ Como a documentação atual não define arquitetura, volume de uso, ambiente de 
 
 ## Requisitos não funcionais
 
+A estrutura deste documento está alinhada aos 8 eixos da ISO/IEC 25010: adequação funcional, desempenho, compatibilidade, usabilidade, confiabilidade, segurança, manutenibilidade e portabilidade. Os números NFR existentes foram preservados; os itens novos adicionados a partir do NFR-11 estão marcados como proposta.
+
 ### NFR-01 — Segurança de acesso
 
 O sistema deve proteger as funções e os dados de acordo com o perfil e o escopo do usuário autenticado.
@@ -67,7 +69,7 @@ As operações frequentes devem responder em tempo adequado para que Solicitante
 
 **Rastreabilidade:** FR-03 a FR-08, FR-12 e FR-13; Solicitante e Responsável.
 
-### NFR-05 — Disponibilidade e recuperação
+### NFR-05 — Confiabilidade e recuperação
 
 O sistema deve permanecer acessível durante os períodos de uso institucional e permitir a recuperação dos dados após falhas.
 
@@ -80,7 +82,7 @@ O sistema deve permanecer acessível durante os períodos de uso institucional e
 
 **Pontos de validação:** período de operação, disponibilidade esperada, frequência de backup e objetivos de recuperação dependem do ambiente e da política institucional.
 
-**Rastreabilidade:** FR-01 a FR-15; continuidade das atividades das três personas.
+**Rastreabilidade:** RN01 a RN10; FR-01 a FR-16; Solicitante, Responsável e Administrador.
 
 ### NFR-06 — Usabilidade e compreensão
 
@@ -145,11 +147,58 @@ As mudanças devem preservar as regras de negócio e manter documentação sufic
 
 **Verificação**
 
-- Alterações em autenticação, disponibilidade, aprovações, conflitos ou movimentações de materiais incluem testes para os respectivos critérios de aceite e regras RN01 a RN08.
+- Alterações em autenticação, disponibilidade, aprovações, conflitos ou movimentações de materiais incluem testes para os respectivos critérios de aceite e regras RN01 a RN10.
 - Mudanças em operações ou fluxos públicos atualizam a documentação correspondente.
 - Os termos usados na interface, nos registros e na documentação são consistentes com o glossário institucional aprovado.
 
-**Rastreabilidade:** FR-06 a FR-12 e FR-15; Solicitante, Responsável e Administrador.
+**Rastreabilidade:** RN01 a RN10; FR-01, FR-02, FR-04, FR-05, FR-06, FR-08, FR-11, FR-12, FR-13, FR-15 e FR-16; Solicitante, Responsável e Administrador.
+
+### NFR-11 — Adequação funcional (proposta)
+
+O sistema deve cobrir adequadamente os objetivos de negócio e responder às regras de reserva, aprovação, manutenção, auditoria e relatório previstos no escopo institucional.
+
+**Verificação**
+
+- Cada requisito funcional principal tem um correspondente em comportamento, validação ou resposta observável no produto.
+- Os fluxos de autenticação, pesquisa, criação, aprovação, bloqueio, relatório e auditoria cobrem as ações esperadas pelas personas e pelos critérios de aceite.
+- Regras de negócio RN01 a RN10 são observáveis em mensagens, estados, registros e restrições do sistema, sem depender de convenções informais.
+- O produto não exige comportamento implícito para executar operações críticas e documentadas.
+
+**Rastreabilidade:** RN01 a RN10; FR-01 a FR-16; Solicitante, Responsável e Administrador.
+
+### NFR-12 — Portabilidade e implantação (proposta)
+
+O sistema deve ser implantável e operar de forma consistente em ambientes e plataformas suportados pela instituição, sem dependências exclusivas de um ambiente específico.
+
+**Verificação**
+
+- O sistema pode ser executado em ambientes de homologação e produção com configuração documentada e sem ajustes manuais de código.
+- A implantação considera compatibilidade com a stack de banco, servidor, sistema operacional e navegador suportados pela instituição.
+- Configurações específicas de ambiente são descritas, versionadas e separadas do código de negócio.
+- O comportamento principal não depende de um único host, caminho local ou variável de ambiente não documentada.
+
+**Rastreabilidade:** RN01 a RN10; FR-01 a FR-16; Solicitante, Responsável e Administrador.
+
+## Matriz FR × NFR
+
+| FR | NFRs relacionadas |
+|---|---|
+| FR-01 | NFR-01, NFR-05, NFR-10, NFR-11 |
+| FR-02 | NFR-01, NFR-02, NFR-05, NFR-10, NFR-11 |
+| FR-03 | NFR-04, NFR-06, NFR-07, NFR-11 |
+| FR-04 | NFR-03, NFR-04, NFR-06, NFR-11 |
+| FR-05 | NFR-01, NFR-03, NFR-05, NFR-06, NFR-10, NFR-11 |
+| FR-06 | NFR-03, NFR-04, NFR-06, NFR-11 |
+| FR-07 | NFR-03, NFR-04, NFR-11 |
+| FR-08 | NFR-01, NFR-06, NFR-08, NFR-10, NFR-11 |
+| FR-09 | NFR-03, NFR-05, NFR-06, NFR-11 |
+| FR-10 | NFR-03, NFR-05, NFR-06, NFR-11 |
+| FR-11 | NFR-01, NFR-02, NFR-05, NFR-09, NFR-10, NFR-11 |
+| FR-12 | NFR-01, NFR-02, NFR-06, NFR-10, NFR-11 |
+| FR-13 | NFR-01, NFR-02, NFR-04, NFR-10, NFR-11 |
+| FR-14 | NFR-06, NFR-07, NFR-08, NFR-11 |
+| FR-15 | NFR-07, NFR-08, NFR-10, NFR-12 |
+| FR-16 | NFR-01, NFR-03, NFR-06, NFR-10, NFR-11 |
 
 ## Decisões necessárias para fechar as metas
 

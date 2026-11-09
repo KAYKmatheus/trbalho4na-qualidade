@@ -1,0 +1,20 @@
+[project]
+name = "alocasenac"
+version = "0.1.0"
+description = "Academic reservation system backbone aligned with the PRD"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi==0.115.0",
+  "uvicorn[standard]==0.30.6",
+  "sqlalchemy==2.0.35",
+  "psycopg[binary]==3.2.1",
+  "alembic==1.13.2",
+  "jinja2==3.1.4",
+  "pytest==8.3.3",
+  "httpx==0.27.2",
+]
+
+[tool.pytest.ini_options]
+python_files = ["test_*.py"]
+addopts = "-q"

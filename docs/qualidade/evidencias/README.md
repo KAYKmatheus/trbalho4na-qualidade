@@ -17,3 +17,16 @@ Registro:
 | Evidência | CT | Data | Executor | Resultado |
 |---|---|---|---|---|
 | | | | | |
+
+## Artefatos de CI
+
+O workflow `.github/workflows/quality.yml` gera e publica como artefatos desta pasta:
+
+- `coverage.xml` e `coverage.json`: cobertura de código com portão de 85%.
+- `pytest.xml`: resultado da suíte completa, incluindo os testes PostgreSQL.
+- `testcontainers.xml`: resultado isolado dos testes de integração.
+- `bdd.xml`: resultado da validação estrutural de cobertura Gherkin.
+- `bandit.json`: análise estática de segurança.
+- `pip-audit.json`: auditoria de dependências.
+
+Os arquivos são produzidos durante o workflow e baixados pela seção **Artifacts** da execução do GitHub Actions. A cobertura Gherkin atual está em [../relatorio-cobertura.md](../relatorio-cobertura.md).

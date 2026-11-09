@@ -6,7 +6,19 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, create_engine, text
+from sqlalchemy import (
+    CheckConstraint,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    create_engine,
+    func,
+    text,
+)
+from sqlalchemy.dialects.postgresql import ExcludeConstraint
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 from app_config import AppSettings
@@ -23,7 +35,13 @@ def configure_database(settings: AppSettings | None = None) -> None:
     global Engine, SessionLocal
     settings = settings or AppSettings()
     Engine = create_engine(settings.database_url, future=True)
-    SessionLocal = sessionmaker(bind=Engine, autoflush=False, autocommit=False, future=True)
+    SessionLocal = sessionmaker(
+        bind=Engine,
+        autoflush=False,
+        autocommit=False,
+        expire_on_commit=False,
+        future=True,
+    )
 
 
 configure_database()
@@ -40,7 +58,6 @@ class Reservation(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     items = relationship("ReservationItem", back_populates="reservation", cascade="all, delete-orphan")
-    query = SessionLocal.query_property() if SessionLocal else None
 
 
 class ReservationItem(Base):
@@ -52,12 +69,41 @@ class ReservationItem(Base):
     resource_id = Column(String, nullable=False)
     start = Column(DateTime(timezone=True), nullable=False)
     end = Column(DateTime(timezone=True), nullable=False)
+    quantity = Column(Integer, nullable=False, default=1)
     status = Column(String, nullable=False, default="PENDENTE")
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     reservation = relationship("Reservation", back_populates="items")
-    query = SessionLocal.query_property() if SessionLocal else None
+
+    __table_args__ = (
+        CheckConstraint('start < "end"', name="ck_reservation_item_valid_interval"),
+        CheckConstraint("quantity > 0", name="ck_reservation_item_positive_quantity"),
+        ExcludeConstraint(
+            ("resource_type", "="),
+            ("resource_id", "="),
+            (func.tstzrange(start, end, "[)"), "&&"),
+            where=text(
+                "resource_type <> 'material' AND status IN "
+                "('PENDENTE', 'APROVADA', 'CONFIRMADA')"
+            ),
+            using="gist",
+            name="excl_active_resource_reservation_interval",
+        ),
+    )
+
+
+class Material(Base):
+    __tablename__ = "materials"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    quantity_total = Column(Integer, nullable=False)
+    active = Column(Boolean, nullable=False, default=True)
+
+    __table_args__ = (
+        CheckConstraint("quantity_total >= 0", name="ck_material_nonnegative_quantity"),
+    )
 
 
 class AuditEntry(Base):
@@ -70,7 +116,6 @@ class AuditEntry(Base):
     payload = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
-    query = SessionLocal.query_property() if SessionLocal else None
 
 
 def init_db(database_url: str | None = None) -> None:
@@ -81,7 +126,13 @@ def init_db(database_url: str | None = None) -> None:
     """
     url = database_url or AppSettings().database_url
     engine = create_engine(url, future=True)
-    Base.metadata.create_all(engine)
+    try:
+        if engine.dialect.name == "postgresql":
+            with engine.begin() as connection:
+                connection.execute(text("CREATE EXTENSION IF NOT EXISTS btree_gist"))
+        Base.metadata.create_all(engine)
+    finally:
+        engine.dispose()
 
 
 def execute_sql(sql_text: str, database_url: str | None = None) -> Any:

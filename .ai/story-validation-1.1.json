@@ -1,0 +1,111 @@
+{
+  "story": "docs/stories/1.1.migracao-java-21.md",
+  "validatedAt": "2026-11-09",
+  "validator": "Pax (@po)",
+  "task": ".aiox-core/development/tasks/validate-next-story.md",
+  "template": ".aiox-core/product/templates/story-tmpl.yaml",
+  "checklist": ".aiox-core/product/checklists/po-master-checklist.md",
+  "verdict": "GO",
+  "score": 10,
+  "status": "Ready",
+  "storyVersion": "1.0.5",
+  "confidence": "high",
+  "statusCheck": {
+    "before": "Ready",
+    "after": "Ready",
+    "transitionApplied": false,
+    "detail": "A story já estava Ready; mantida nesse estado conforme o pedido, com a revalidação registrada no Change Log."
+  },
+  "templateCompliance": {
+    "requiredSectionsPresent": true,
+    "placeholders": "Nenhum placeholder de template pendente; campos Dev Agent Record e QA Results estão reservados para os agentes responsáveis.",
+    "communityOrigin": "not applicable; internal story",
+    "coderabbitSection": "present and populated; global configuration recorded without inferring executor overrides",
+    "epicLink": "present and verified against Epic 1"
+  },
+  "executorAssignment": {
+    "executor": "@dev",
+    "qualityGate": "@architect",
+    "qualityGateToolsPresent": true,
+    "result": "PASS",
+    "detail": "@architect consta na whitelist da task e difere de @dev; o campo foi preservado conforme atualização de @pm."
+  },
+  "codeIntelligence": {
+    "runtimeCheck": "NOT_CHECKED",
+    "detail": "A chamada runtime de isCodeIntelAvailable()/validateNoDuplicates() não foi executada nesta revalidação; nenhum resultado anterior foi assumido."
+  },
+  "checklist": [
+    { "item": 1, "criterion": "Título claro e objetivo", "result": "PASS", "point": 1 },
+    { "item": 2, "criterion": "Descrição completa da necessidade", "result": "PASS", "point": 1 },
+    { "item": 3, "criterion": "Critérios testáveis e mensuráveis", "result": "PASS", "point": 1, "detail": "JaCoCo, OWASP Dependency-Check, limiares propostos, escopo, exceções e regra de supressão estão explícitos nos ACs." },
+    { "item": 4, "criterion": "Escopo IN/OUT definido", "result": "PASS", "point": 1 },
+    { "item": 5, "criterion": "Dependências mapeadas", "result": "PASS", "point": 1, "detail": "Epic 1 existe, lista 1.1 e está linkado; dependências técnicas e fontes estão identificadas." },
+    { "item": 6, "criterion": "Estimativa de complexidade", "result": "PASS", "point": 1 },
+    { "item": 7, "criterion": "Valor de negócio explícito", "result": "PASS", "point": 1 },
+    { "item": 8, "criterion": "Riscos documentados", "result": "PASS", "point": 1, "detail": "Riscos de concorrência, amplitude da migração e limpeza destrutiva estão documentados; a tarefa registra commit-base." },
+    { "item": 9, "criterion": "Definition of Done clara", "result": "PASS", "point": 1 },
+    { "item": 10, "criterion": "Alinhamento com PRD/Epic", "result": "PASS", "point": 1, "detail": "FR-04/FR-06/FR-07 e CT-01–CT-40 foram conferidos; CT-15–CT-20 correspondem aos cenários descritos." }
+  ],
+  "blockers": [],
+  "criticalIssues": [],
+  "shouldFix": [
+    "A checklist PO oficial pede estratégia de rollback por story. A story condiciona a limpeza Python a todos os gates e manda registrar o commit-base, mas não descreve explicitamente o procedimento de restauração; recomendação não bloqueante.",
+    "A story documenta a configuração global CodeRabbit full/3 iterações/30 minutos. A task também apresenta uma tabela de modos esperados por agente (@dev light), sem override por agente no core-config.yaml; divergência de configuração documentada, não bloqueante para o quality_gate formal."
+  ],
+  "niceToHave": [],
+  "antiHallucinationFindings": {
+    "result": "PASS",
+    "detail": "Epic 1 sincronizado, requisitos funcionais, casos de teste e fontes técnicas foram conferidos. As propostas do solicitante continuam explicitamente não normativas; nenhum CT foi marcado aprovado.",
+    "epicContext": "verified: story 1.1 is listed Ready; Dependencies and Handoff state 1.1 Ready and 1.2–1.7 Draft, planned for later stages",
+    "relatedStories": "All story files 1.2–1.7 exist and have Status Draft; their existence, titles and requirement/CT mappings agree with the Epic table."
+  },
+  "codeRabbitFindings": {
+    "enabled": true,
+    "sectionPresent": true,
+    "storyTypeAndAgentsPresent": true,
+    "qualityGatesPresent": true,
+    "selfHealingMatchesGlobalConfig": true,
+    "focusAreasPresent": true,
+    "perAgentConfiguration": "not defined in core-config.yaml; no executor-specific behavior inferred",
+    "taskModeNote": "A task descreve @dev light como modo esperado, enquanto o core-config.yaml habilita globalmente full. A story registra a configuração global sem afirmar override; apontado como recomendação, não como erro no campo quality_gate."
+  },
+  "poMasterChecklist": {
+    "projectType": "brownfield, backend/API; no UI-specific scope",
+    "referencedChecklist": ".aiox-core/product/checklists/po-master-checklist.md",
+    "appliedChecklist": ".aiox-core/product/checklists/po-master-checklist.md",
+    "categories": {
+      "projectSetup": "PASS_WITH_NOTE: environment, stack, existing tests and migration sequencing are specified; rollback procedure should be made explicit",
+      "infrastructureDeployment": "PASS: PostgreSQL/Flyway, Testcontainers, Docker, CI and verification gates are sequenced",
+      "externalDependencies": "PASS: required tools/dependencies are named; Dependency-Check thresholds remain labeled as proposal",
+      "uiUx": "SKIPPED: no UI scope",
+      "userAgentResponsibility": "PASS: executor @dev differs from formal quality_gate @architect; @qa review remains distinct",
+      "featureSequencing": "PASS",
+      "riskManagement": "PASS_WITH_NOTE: destructive Python cleanup remains gated and a baseline commit is required; rollback procedure is not explicit",
+      "mvpScope": "PASS",
+      "documentationHandoff": "PASS",
+      "postMvp": "NOT_APPLICABLE_TO_MIGRATION_SCOPE"
+    },
+    "skippedSections": ["UI/UX-specific criteria", "post-MVP enhancement criteria not applicable to this migration story"]
+  },
+  "reconciledConfirmations": [
+    "Flyway V1 derivado do DBML permanece especificado no AC 2.",
+    "Portabilidade do núcleo FR-04/FR-06/FR-07 e CT-15 a CT-20 com PostgreSQL/Testcontainers explicitada no AC 6.",
+    "Cucumber para CT-01 a CT-40 e falha por CT não coberto ou tag para CT inexistente explicitados no AC 7.",
+    "JaCoCo 85% de linhas (escopo e exclusões definidos), meta 70% branches não bloqueante, e Dependency-Check CVSS >= 7.0 estão registrados como propostas do solicitante, não decisões normativas.",
+    "Supressões de Dependency-Check exigem justificativa, data de validade e registro em relatório de segurança.",
+    "O caminho de tutorial foi corrigido para tutorial.md, existente no workspace; docs/tutorial-implementacao.md não existe.",
+    "Remoção Python permanece condicionada à aprovação de todos os gates e evidências.",
+    "ADR deve registrar decisão e contexto de domínio da equipe sem presumir proficiência não confirmada.",
+    "Epic sincronizado: tabela e Dependencies/Handoff refletem 1.1 Ready e 1.2–1.7 Draft, sem implementação nesta etapa.",
+    "FR-04/FR-06/FR-07 e CT-01–CT-40 foram verificados; CT-15–CT-20 correspondem aos cenários descritos e todos os CTs continuam Não executado.",
+    "JaCoCo 85% de linhas no escopo solicitado, branches 70% reportável/não bloqueante e Dependency-Check CVSS >= 7.0, abaixo reportável e supressões justificadas/limitadas/relatadas seguem explicitamente rotulados como propostas."
+  ],
+  "testCaseStatusesChanged": false,
+  "sourceDocumentsModifiedByValidation": false,
+  "executionLimits": {
+    "mavenTests": "NOT_RUN_BY_REQUEST",
+    "codeIntelligenceRuntime": "NOT_RUN",
+    "normativeSourcesModified": false
+  },
+  "reportPath": ".ai/story-validation-1.1.json"
+}

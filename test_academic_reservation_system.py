@@ -6,7 +6,6 @@ traceable to the PRD and quality docs.
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -17,14 +16,15 @@ from domain_rules import (
     is_overlapping_interval,
     material_stock_available,
 )
+from errors import ValidationError
 from models import AuditEntry, Reservation, ReservationItem
 from services import ReservationService
 
 
 @pytest.fixture
-def settings() -> AppSettings:
+def settings(postgres_database_url: str) -> AppSettings:
     return AppSettings(
-        database_url="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test",
+        database_url=postgres_database_url,
         app_name="alocasenac",
     )
 
@@ -58,6 +58,25 @@ def test_material_stock_is_rejected_when_exceeded() -> None:
     assert material_stock_available(available=4, reserved=3, requested=2) is False
 
 
+def test_service_rejects_missing_request_fields_before_connecting() -> None:
+    service = ReservationService(AppSettings())
+
+    with pytest.raises(ValidationError):
+        service.create_reservation(solicitante_id="", reason="Teste", items=[{}])
+
+    with pytest.raises(ValidationError):
+        service.create_reservation(solicitante_id="user-1", reason="Teste", items=[])
+
+
+def test_service_parses_iso_datetimes_and_rejects_invalid_values() -> None:
+    valid = ReservationService._parse_datetime("2026-02-01T09:00:00Z")
+    assert valid == datetime(2026, 2, 1, 9, 0, tzinfo=timezone.utc)
+
+    with pytest.raises(ValidationError):
+        ReservationService._parse_datetime("not-a-date")
+
+
+@pytest.mark.integration
 def test_service_creates_reservation_and_audit_record(settings: AppSettings) -> None:
     """Verifica FR-11, RN08, NFR-09, CT-28.
 
@@ -80,15 +99,24 @@ def test_service_creates_reservation_and_audit_record(settings: AppSettings) -> 
 
     assert isinstance(reservation, Reservation)
     assert len(reservation.items) == 1
-    assert ReservationItem.query.filter_by(reservation_id=reservation.id).count() == 1
-    assert AuditEntry.query.filter_by(entity_type="reservation", entity_id=reservation.id).count() == 1
+    import models
+
+    session = models.SessionLocal()
+    try:
+        assert session.query(ReservationItem).filter_by(reservation_id=reservation.id).count() == 1
+        assert session.query(AuditEntry).filter_by(
+            entity_type="reservation",
+            entity_id=reservation.id,
+        ).count() == 1
+    finally:
+        session.close()
 
 
+@pytest.mark.integration
 def test_service_rejects_conflicting_room_reservation(settings: AppSettings) -> None:
-    """Verifica FR-07, RN04, NFR-03, CT-19.
+    """Verifica FR-06, RN02, NFR-03, CT-15.
 
-    Operações concorrentes sobre o mesmo recurso devem produzir um conflito e
-    uma resposta clara para a segunda tentativa.
+    Uma segunda reserva sequencial em intervalo sobreposto deve ser recusada.
     """
     service = ReservationService(settings)
 
@@ -121,87 +149,10 @@ def test_service_rejects_conflicting_room_reservation(settings: AppSettings) -> 
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "resource_type, resource_id, start, end",
-    [
-        ("sala", "room-7", "2026-01-12T08:00:00Z", "2026-01-12T10:00:00Z"),
-        ("professor", "teacher-7", "2026-01-12T08:00:00Z", "2026-01-12T10:00:00Z"),
-    ],
-)
-def test_postgres_real_database_accepts_integration_write(resource_type: str, resource_id: str, start: str, end: str) -> None:
-    """Verifica FR-02, FR-11, NFR-05, CT-06 e CT-28.
-
-    A integração usa PostgreSQL real para teste de persistência.
-    """
-    from sqlalchemy import create_engine, text
-
-    engine = create_engine("postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test")
-    with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
-        conn.execute(
-            text(
-                "CREATE TABLE IF NOT EXISTS integration_probe (resource_type TEXT, resource_id TEXT, start_ts TIMESTAMPTZ, end_ts TIMESTAMPTZ)"
-            )
-        )
-        conn.execute(
-            text(
-                "INSERT INTO integration_probe (resource_type, resource_id, start_ts, end_ts) VALUES (:resource_type, :resource_id, :start, :end)"
-            ),
-            {
-                "resource_type": resource_type,
-                "resource_id": resource_id,
-                "start": start,
-                "end": end,
-            },
-        )
-        conn.commit()
-
-        row = conn.execute(
-            text(
-                "SELECT COUNT(*) FROM integration_probe WHERE resource_type = :resource_type AND resource_id = :resource_id"
-            ),
-            {"resource_type": resource_type, "resource_id": resource_id},
-        ).scalar_one()
-        assert row == 1
-
-
-@pytest.mark.integration
-def test_concurrent_room_requests_only_one_reservation_succeeds() -> None:
-    """Verifica FR-07, RN04, NFR-03, CT-19.
-
-    Em ambiente PostgreSQL real, apenas uma das solicitações concorrentes deve
-    confirmar a reserva no mesmo intervalo.
-    """
-    from models import init_db
-    from services import ReservationService
-
-    init_db("postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test")
-    service = ReservationService(AppSettings(database_url="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"))
-
-    def attempt(user_id: str):
-        try:
-            return service.create_reservation(
-                solicitante_id=user_id,
-                reason="Reserva concorrente",
-                items=[
-                    {
-                        "resource_type": "sala",
-                        "resource_id": "room-concurrent",
-                        "start": datetime(2026, 2, 1, 9, 0, tzinfo=timezone.utc),
-                        "end": datetime(2026, 2, 1, 11, 0, tzinfo=timezone.utc),
-                    }
-                ],
-            )
-        except ConflictError:
-            return None
-
-    with ThreadPoolExecutor(max_workers=2) as pool:
-        results = list(pool.map(attempt, ["user-a", "user-b"]))
-
-    assert sum(result is not None for result in results) == 1
-
-
-def test_api_v1_responds_to_creation_endpoint() -> None:
+def test_api_v1_responds_to_creation_endpoint(
+    settings: AppSettings,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Verifica FR-04, FR-14, NFR-06, CT-10 e CT-33.
 
     A API /v1 deve expor a criação de reservas com resposta clara.
@@ -209,6 +160,7 @@ def test_api_v1_responds_to_creation_endpoint() -> None:
     from api_v1 import app
     from fastapi.testclient import TestClient
 
+    monkeypatch.setattr("api_v1.AppSettings", lambda: settings)
     client = TestClient(app)
     response = client.post(
         "/v1/reservations",
@@ -230,6 +182,30 @@ def test_api_v1_responds_to_creation_endpoint() -> None:
     payload = response.json()
     assert payload["status"] == "PENDENTE"
     assert payload["items"][0]["resource_type"] == "sala"
+
+
+def test_api_health_endpoint_reports_service_status() -> None:
+    from api_v1 import app
+    from fastapi.testclient import TestClient
+
+    response = TestClient(app).get("/v1/health")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+
+def test_api_returns_422_when_reservation_has_no_items(monkeypatch: pytest.MonkeyPatch) -> None:
+    from api_v1 import app
+    from fastapi.testclient import TestClient
+
+    settings = AppSettings()
+    monkeypatch.setattr("api_v1.AppSettings", lambda: settings)
+    response = TestClient(app).post(
+        "/v1/reservations",
+        json={"solicitante_id": "user-1", "reason": "Teste", "items": []},
+    )
+
+    assert response.status_code == 422
 
 
 def test_home_page_renders_reservation_dashboard() -> None:

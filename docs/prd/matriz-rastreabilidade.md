@@ -48,6 +48,100 @@ Documentos-base: [FR e RN](./requisitos-funcionais-sistema-academico.md), [NFR](
 | 4 | Faixa de RN no NFR-03 | Mantida, com justificativa por escrito. RN08 é coberta pelo NFR-09 | NFR-03 |
 | 5 | Escopo do Responsável | Tabela `escopos_responsavel` e RN09 | FR-01, FR-02, FR-08, CT-37, CT-40 |
 
+## Status individual dos CTs
+
+Status baseado na automação existente no repositório. A execução funcional desta entrega ainda depende do workflow; `BDD coberto` indica somente rastreabilidade do cenário.
+
+| CT | Status |
+|---|---|
+| CT-01 | BDD coberto; execução funcional pendente |
+| CT-02 | BDD coberto; execução funcional pendente |
+| CT-03 | BDD coberto; execução funcional pendente |
+| CT-04 | BDD coberto; execução funcional pendente |
+| CT-05 | BDD coberto; execução funcional pendente |
+| CT-06 | BDD coberto; execução funcional pendente |
+| CT-07 | BDD coberto; execução funcional pendente |
+| CT-08 | BDD coberto; execução funcional pendente |
+| CT-09 | BDD coberto; execução funcional pendente |
+| CT-10 | BDD coberto; teste de API existente; execução CI pendente |
+| CT-11 | BDD coberto; execução funcional pendente |
+| CT-12 | BDD coberto; execução funcional pendente |
+| CT-13 | BDD coberto; execução funcional pendente |
+| CT-14 | BDD coberto; execução funcional pendente |
+| CT-15 | BDD coberto; teste sequencial de conflito existente; execução CI pendente |
+| CT-16 | BDD coberto; execução funcional pendente |
+| CT-17 | BDD coberto; teste unitário de intervalo existente; execução CI pendente |
+| CT-18 | BDD coberto; teste unitário de estoque existente; integração pendente |
+| CT-19 | BDD coberto; teste concorrente PostgreSQL/Testcontainers adicionado; execução pendente |
+| CT-20 | BDD coberto; teste concorrente PostgreSQL/Testcontainers adicionado; execução pendente |
+| CT-21 | BDD coberto; execução funcional pendente |
+| CT-22 | BDD coberto; execução funcional pendente |
+| CT-23 | BDD coberto; execução funcional pendente |
+| CT-24 | BDD coberto; execução funcional pendente |
+| CT-25 | BDD coberto; execução funcional pendente |
+| CT-26 | BDD coberto; execução funcional pendente |
+| CT-27 | BDD coberto; execução funcional pendente |
+| CT-28 | BDD coberto; teste de auditoria parcial existente; execução CI pendente |
+| CT-29 | BDD coberto; execução funcional pendente |
+| CT-30 | BDD coberto; execução funcional pendente |
+| CT-31 | BDD coberto; execução funcional pendente |
+| CT-32 | BDD coberto; execução funcional pendente |
+| CT-33 | BDD coberto; teste de resposta da API parcial existente; execução CI pendente |
+| CT-34 | BDD coberto; execução funcional pendente |
+| CT-35 | BDD coberto; validação do contrato OpenAPI pendente |
+| CT-36 | BDD coberto; execução funcional pendente |
+| CT-37 | BDD coberto; execução funcional pendente |
+| CT-38 | BDD coberto; execução funcional pendente |
+| CT-39 | BDD coberto; execução funcional pendente |
+| CT-40 | BDD coberto; execução funcional pendente |
+
+## Status individual dos CTs
+
+Status baseado na automação existente no repositório. A execução funcional desta entrega ainda depende do workflow; `BDD coberto` indica somente rastreabilidade do cenário.
+
+| CT | Status |
+|---|---|
+| CT-01 | BDD coberto; execução funcional pendente |
+| CT-02 | BDD coberto; execução funcional pendente |
+| CT-03 | BDD coberto; execução funcional pendente |
+| CT-04 | BDD coberto; execução funcional pendente |
+| CT-05 | BDD coberto; execução funcional pendente |
+| CT-06 | BDD coberto; execução funcional pendente |
+| CT-07 | BDD coberto; execução funcional pendente |
+| CT-08 | BDD coberto; execução funcional pendente |
+| CT-09 | BDD coberto; execução funcional pendente |
+| CT-10 | BDD coberto; teste de API existente; execução CI pendente |
+| CT-11 | BDD coberto; execução funcional pendente |
+| CT-12 | BDD coberto; execução funcional pendente |
+| CT-13 | BDD coberto; execução funcional pendente |
+| CT-14 | BDD coberto; execução funcional pendente |
+| CT-15 | BDD coberto; teste sequencial de conflito existente; execução CI pendente |
+| CT-16 | BDD coberto; execução funcional pendente |
+| CT-17 | BDD coberto; teste unitário de intervalo existente; execução CI pendente |
+| CT-18 | BDD coberto; teste unitário de estoque existente; integração pendente |
+| CT-19 | BDD coberto; teste concorrente PostgreSQL/Testcontainers adicionado; execução pendente |
+| CT-20 | BDD coberto; teste concorrente PostgreSQL/Testcontainers adicionado; execução pendente |
+| CT-21 | BDD coberto; execução funcional pendente |
+| CT-22 | BDD coberto; execução funcional pendente |
+| CT-23 | BDD coberto; execução funcional pendente |
+| CT-24 | BDD coberto; execução funcional pendente |
+| CT-25 | BDD coberto; execução funcional pendente |
+| CT-26 | BDD coberto; execução funcional pendente |
+| CT-27 | BDD coberto; execução funcional pendente |
+| CT-28 | BDD coberto; teste de auditoria parcial existente; execução CI pendente |
+| CT-29 | BDD coberto; execução funcional pendente |
+| CT-30 | BDD coberto; execução funcional pendente |
+| CT-31 | BDD coberto; execução funcional pendente |
+| CT-32 | BDD coberto; execução funcional pendente |
+| CT-33 | BDD coberto; teste de resposta da API parcial existente; execução CI pendente |
+| CT-34 | BDD coberto; execução funcional pendente |
+| CT-35 | BDD coberto; validação do contrato OpenAPI pendente |
+| CT-36 | BDD coberto; execução funcional pendente |
+| CT-37 | BDD coberto; execução funcional pendente |
+| CT-38 | BDD coberto; execução funcional pendente |
+| CT-39 | BDD coberto; execução funcional pendente |
+| CT-40 | BDD coberto; execução funcional pendente |
+
 ## Pendências em aberto
 
 1. **Quais recursos são restritos** é decisão institucional: defina a lista real (por exemplo laboratórios e projetores).

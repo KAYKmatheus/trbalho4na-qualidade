@@ -16,3 +16,10 @@ horário.
 
 - [Personas](./docs/prd/personas-sistema-academico.md)
 - [Modelagem de dados (DBML)](./docs/prd/modelagem-dados-sistema-academico.dbml)
+
+## Desenvolvimento local
+
+Instale as dependências de desenvolvimento com `pip install -r requirements-dev.txt`.
+Para iniciar a aplicação em containers, forneça `POSTGRES_PASSWORD` e `DATABASE_URL`
+no ambiente do Docker Compose; não grave credenciais no Dockerfile ou no repositório.
+O endpoint de healthcheck é `/v1/health`.

@@ -27,3 +27,8 @@ Thumbs.db
 .aiox-core/local/
 .claude/settings.local.json
 .aiox/install-log.txt
+.venv/
+__pycache__/
+.coverage
+htmlcov/
+status.txt

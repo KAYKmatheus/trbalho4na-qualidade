@@ -102,6 +102,22 @@ CREATE TABLE reservas (
     CONSTRAINT ck_reservas_versao CHECK (versao > 0)
 );
 
+CREATE FUNCTION manter_versao_reserva() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        NEW.versao := COALESCE(NEW.versao, 1);
+    ELSIF NEW.versao = OLD.versao THEN
+        NEW.versao := OLD.versao + 1;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_manter_versao_reserva
+    BEFORE INSERT OR UPDATE ON reservas
+    FOR EACH ROW EXECUTE FUNCTION manter_versao_reserva();
+
 CREATE TABLE reserva_itens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     reserva_id uuid NOT NULL REFERENCES reservas(id) ON DELETE RESTRICT,

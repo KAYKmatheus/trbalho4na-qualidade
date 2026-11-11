@@ -48,8 +48,27 @@ Documentos-base: [FR e RN](./requisitos-funcionais-sistema-academico.md), [NFR](
 | 4 | Faixa de RN no NFR-03 | Mantida, com justificativa por escrito. RN08 é coberta pelo NFR-09 | NFR-03 |
 | 5 | Escopo do Responsável | Tabela `escopos_responsavel` e RN09 | FR-01, FR-02, FR-08, CT-37, CT-40 |
 
+## Implementação da Parte 2 (tarefas 23–34)
+
+| Tarefa | FR / CT | Implementação | Testes / validação |
+|---|---|---|---|
+| 23 — Autenticação e papéis | FR-01; CT-01 a CT-05 | `app/api/deps.py`, `app/servicos/autenticacao.py`, rotas em `app/api/v1.py` | `test_autenticacao.py`, `test_alteracao_cancelamento.py`, `test_aprovacoes.py` |
+| 24 — Recursos e escopo | FR-02, RN09; CT-06, CT-07, CT-40 | `app/servicos/recursos.py`, modelo `Resource`, auditoria e rotas administrativas | `test_recursos.py`, `test_api_errors.py` |
+| 25 — Disponibilidade | FR-03; CT-08, CT-09 | `app/servicos/disponibilidade.py` e `/v1/resources/search` | `test_disponibilidade.py` |
+| 26 — Alterar, cancelar e transições | FR-05; CT-13, CT-14 | `app/servicos/reservas.py`, regras de estado e rotas de reserva | `test_alteracao_cancelamento.py`, `test_regras_dominio.py` |
+| 27 — Aprovação e validação docente | FR-08, FR-16; CT-21 a CT-23, CT-36, CT-37, CT-39 | `app/servicos/aprovacoes.py` e decisão por item | `test_aprovacoes.py` |
+| 28 — Manutenção | FR-09; CT-24 | `app/servicos/manutencao.py` e bloqueios de recurso | `test_manutencao.py`, `test_api_errors.py` |
+| 29 — Movimentação de materiais | FR-10; CT-25 a CT-27 | `app/servicos/materiais.py`, saldo pendente e indisponibilidade | `test_materiais.py` |
+| 30 — Notificações simuladas | FR-12; CT-30 | `app/servicos/notificacoes.py`, sem integração externa | `test_notificacoes.py` |
+| 31 — Relatórios/conflitos | FR-11, FR-13; CT-31, CT-32, CT-38 | `app/servicos/relatorios.py`, eventos de auditoria | `test_relatorios.py` |
+| 32 — Interface, erros e OpenAPI | FR-14, FR-15; CT-33 a CT-35 | Dashboard em `app/api/v1.py` e contrato OpenAPI do FastAPI | `test_interface_api.py`, `test_api_errors.py` |
+| 33 — Contêiner e CI | NFR; gates de qualidade | `Dockerfile`, `.github/workflows/ci.yml`, `sonar-project.properties` | `test_delivery_config.py`; cobertura em [relatório](../qualidade/relatorio-cobertura.md) |
+| 34 — Desempenho | NFR-04 | Plano [JMeter](../../tests/desempenho/reservas.jmx) | XML validado; execução de carga pendente |
+
+O estado detalhado das execuções e das validações pendentes está no
+[relatório de cobertura](../qualidade/relatorio-cobertura.md).
+
 ## Pendências em aberto
 
-1. **Quais recursos são restritos** é decisão institucional: defina a lista real (por exemplo laboratórios e projetores).
-2. **Bloqueio sobre reserva já aprovada** precisa de política: cancelar, notificar ou recusar o bloqueio. O fluxo 7 assume aviso ao Administrador.
-3. **Reserva com itens decididos de forma diferente** (um item aprovado e outro rejeitado): definir se a reserva fica parcialmente confirmada ou é cancelada por inteiro.
+1. **Bloqueio sobre reserva já aprovada** precisa de política: cancelar, notificar ou recusar o bloqueio. O fluxo 7 assume aviso ao Administrador.
+2. **Reserva com itens decididos de forma diferente** (um item aprovado e outro rejeitado): definir se a reserva fica parcialmente confirmada ou é cancelada por inteiro.

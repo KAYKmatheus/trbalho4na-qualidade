@@ -11,7 +11,7 @@ from tests.bdd.gherkin_steps import read_scenarios
 
 ROOT = Path(__file__).resolve().parents[2]
 CASES_FILE = ROOT / "docs" / "qualidade" / "casos-de-teste.md"
-FEATURES_DIR = ROOT / "features"
+FEATURES_DIR = ROOT / "tests" / "bdd" / "features"
 DOCUMENTED_CT = re.compile(r"^\|\s*(CT-\d{2})\s*\|", re.MULTILINE)
 
 
@@ -19,7 +19,10 @@ class GherkinCoverageTest(unittest.TestCase):
     """Garante que nenhum CT fique sem cenário e nenhum cenário seja órfão."""
 
     def test_feature_scenarios_cover_all_documented_test_cases(self) -> None:
-        documented_cases = set(DOCUMENTED_CT.findall(CASES_FILE.read_text(encoding="utf-8")))
+        case_definitions = CASES_FILE.read_text(encoding="utf-8").split(
+            "## Modelo de registro de execução", maxsplit=1
+        )[0]
+        documented_cases = set(DOCUMENTED_CT.findall(case_definitions))
         scenarios = read_scenarios(FEATURES_DIR)
         scenario_cases = [scenario.case_id for scenario in scenarios if scenario.case_id]
         marker_counts = Counter(scenario_cases)

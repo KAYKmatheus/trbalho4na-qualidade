@@ -56,7 +56,7 @@ def test_service_creates_reservation_and_audit_record(db_session) -> None:
 
 
 def test_service_rejects_conflicting_room_reservation(db_session) -> None:
-    """Verifica FR-07, RN04, NFR-03, CT-19."""
+    """Verifica conflitos de sala em reservas sequenciais (CT-15)."""
     service = ReservationService(db_session)
     reservation = service.create_reservation(
         solicitante_id="user-1",

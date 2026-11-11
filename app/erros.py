@@ -19,6 +19,3 @@ class ConflictError(AppError):
 
 class PermissaoNegadaError(AppError):
     """Raised when authorization rules are violated."""
-
-
-PermissionError = PermissaoNegadaError

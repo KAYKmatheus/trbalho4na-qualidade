@@ -31,7 +31,7 @@ def initialize_postgres_schema() -> None:
 def test_postgres_real_database_accepts_integration_write(
     resource_type: str, resource_id: str, start: str, end: str
 ) -> None:
-    """Verifica FR-02, FR-11, NFR-05, CT-06 e CT-28."""
+    """Verifica acesso e gravação no PostgreSQL de integração."""
     resource_id = f"{resource_id}-{uuid4().hex}"
     engine = create_engine(AppSettings().database_url)
     try:

@@ -1,16 +1,24 @@
 """Unit tests for pure reservation domain rules."""
 
+import builtins
 from datetime import datetime, timezone
 
 import pytest
 
+from app import erros
 from app.dominio.regras import (
     StatusReserva,
     is_overlapping_interval,
     material_stock_available,
     transition_reservation_status,
 )
-from app.erros import ValidationError
+from app.erros import PermissaoNegadaError, ValidationError
+
+
+def test_permission_denied_exception_does_not_shadow_builtin() -> None:
+    assert erros.PermissaoNegadaError is PermissaoNegadaError
+    assert not hasattr(erros, "PermissionError")
+    assert builtins.PermissionError is PermissionError
 
 
 def test_interval_overlap_rule_detects_conflict() -> None:

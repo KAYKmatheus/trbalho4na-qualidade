@@ -12,6 +12,13 @@ class ValidationError(AppError):
 class ConflictError(AppError):
     """Raised when resource availability or business constraints are violated."""
 
+    def __init__(self, message: str, *, context: dict[str, str] | None = None):
+        super().__init__(message)
+        self.context = context
 
-class PermissionError(AppError):
+
+class PermissaoNegadaError(AppError):
     """Raised when authorization rules are violated."""
+
+
+PermissionError = PermissaoNegadaError

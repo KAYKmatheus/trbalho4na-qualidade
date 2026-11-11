@@ -1,18 +1,22 @@
 """PostgreSQL integration tests for persistence and concurrency."""
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
+from threading import Barrier
 from uuid import uuid4
 
 import pytest
 from sqlalchemy import text
 
 from app.db import init_db
+from app.dominio.regras import StatusReserva
 from app.erros import ConflictError
 from app.models import Resource, User
 from app.servicos.reservas import ReservationService
 
 START = datetime(2026, 12, 1, 9, 0, tzinfo=timezone.utc)
 END = datetime(2026, 12, 1, 11, 0, tzinfo=timezone.utc)
+THREAD_COUNT = 10
 
 
 def _create_requesters(pg_session_factory, user_ids: list[str]) -> None:
@@ -121,3 +125,45 @@ def test_overlapping_material_reservations_respect_available_stock(
 
     assert error.value.context is not None
     assert error.value.context["cause"] == "ESTOQUE"
+
+
+@pytest.mark.integration
+@pytest.mark.concorrencia
+def test_ct19_concurrent_room_requests_only_one_reservation_succeeds(
+    pg_session_factory, clean_postgres_database
+) -> None:
+    """Verifica CT-19: uma de dez requisições concorrentes pela mesma sala vence."""
+    user_ids = [f"requester-{uuid4().hex}" for _ in range(THREAD_COUNT)]
+    _create_requesters(pg_session_factory, user_ids)
+
+    def attempt(user_id: str, resource_id: str, barrier: Barrier) -> str:
+        with pg_session_factory() as session:
+            barrier.wait(timeout=30)
+            try:
+                reservation = ReservationService(session).create_reservation(
+                    solicitante_id=user_id,
+                    reason="Reserva concorrente CT-19",
+                    items=[
+                        {
+                            "resource_type": "sala",
+                            "resource_id": resource_id,
+                            "start": START,
+                            "end": END,
+                        }
+                    ],
+                )
+                return reservation.status
+            except ConflictError:
+                return "conflito"
+
+    for _ in range(5):
+        resource_id = f"room-concurrent-{uuid4().hex}"
+        with pg_session_factory.begin() as session:
+            session.add(Resource(id=resource_id, resource_type="sala", name="Sala concorrente"))
+
+        barrier = Barrier(THREAD_COUNT)
+        with ThreadPoolExecutor(max_workers=THREAD_COUNT) as pool:
+            results = list(pool.map(lambda user_id: attempt(user_id, resource_id, barrier), user_ids))
+
+        assert results.count(StatusReserva.CONFIRMADA.value) == 1
+        assert results.count("conflito") == THREAD_COUNT - 1

@@ -26,4 +26,14 @@ horário.
   para ele ao executar esses testes.
 - Instale as dependências pela fonte única em `pyproject.toml` com
   `pip install -r requirements.txt`.
+- Configure `AUTH_SECRET_KEY` com um segredo aleatório fora do repositório.
+  O login é feito em `POST /v1/auth/login` com `email` e `password`; envie o
+  token retornado como `Authorization: Bearer <token>`. Senhas são armazenadas
+  com hash PBKDF2 e contas são provisionadas por Administradores em
+  `POST /v1/admin/users`.
 - Execute a API com `uvicorn app.main:app --reload`.
+- O plano de carga JMeter e os passos para executá-lo estão em
+  [desempenho](./docs/qualidade/desempenho.md). A execução ainda depende de
+  PostgreSQL com dados de teste locais.
+- No GitHub, cadastre `SONAR_TOKEN` como Actions secret para habilitar o scan
+  SonarCloud; o workflow pula essa etapa enquanto o segredo não estiver definido.

@@ -12,7 +12,7 @@ dependencies = [
   "fastapi==0.115.0",
   "uvicorn[standard]==0.30.6",
   "sqlalchemy==2.0.35",
-  "psycopg[binary]==3.2.1",
+  "psycopg[binary]>=3.2.10,<4",
 ]
 
 [tool.setuptools.packages.find]
@@ -35,6 +35,13 @@ markers = [
   "integration: requires a PostgreSQL test database",
   "concorrencia: exercises concurrent reservation behavior",
 ]
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+show_missing = true
 
 [tool.ruff]
 line-length = 120

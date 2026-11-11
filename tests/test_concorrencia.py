@@ -2,15 +2,22 @@
 
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
+from uuid import uuid4
 
 import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from app.config import AppSettings
+from app.db import init_db
 from app.erros import ConflictError
 from app.models import Base
 from app.servicos.reservas import ReservationService
+
+
+@pytest.fixture(scope="module", autouse=True)
+def initialize_postgres_schema() -> None:
+    init_db()
 
 
 @pytest.mark.integration
@@ -25,6 +32,7 @@ def test_postgres_real_database_accepts_integration_write(
     resource_type: str, resource_id: str, start: str, end: str
 ) -> None:
     """Verifica FR-02, FR-11, NFR-05, CT-06 e CT-28."""
+    resource_id = f"{resource_id}-{uuid4().hex}"
     engine = create_engine(AppSettings().database_url)
     try:
         with engine.begin() as conn:
@@ -67,6 +75,7 @@ def test_concurrent_room_requests_only_one_reservation_succeeds() -> None:
     engine = create_engine(AppSettings().database_url)
     Base.metadata.create_all(engine)
     integration_session_factory = sessionmaker(bind=engine, expire_on_commit=False)
+    resource_id = f"room-concurrent-{uuid4().hex}"
 
     def attempt(user_id: str):
         with integration_session_factory() as session:
@@ -77,7 +86,7 @@ def test_concurrent_room_requests_only_one_reservation_succeeds() -> None:
                     items=[
                         {
                             "resource_type": "sala",
-                            "resource_id": "room-concurrent",
+                            "resource_id": resource_id,
                             "start": datetime(2026, 2, 1, 9, 0, tzinfo=timezone.utc),
                             "end": datetime(2026, 2, 1, 11, 0, tzinfo=timezone.utc),
                         }

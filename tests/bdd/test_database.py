@@ -1,6 +1,7 @@
 """Database setup and migration parsing checks."""
 
 from contextlib import contextmanager
+from pathlib import Path
 from types import SimpleNamespace
 
 import app.db as database
@@ -50,6 +51,33 @@ def test_migrations_execute_each_postgres_statement(monkeypatch) -> None:
 
     assert len(executed) >= 7
     assert all(statement.strip() for statement in executed)
+
+
+def test_migration_set_is_three_idempotent_subject_migrations() -> None:
+    migration_dir = Path(__file__).resolve().parents[2] / "migrations"
+    migration_names = sorted(path.name for path in migration_dir.glob("*.sql"))
+
+    assert migration_names == [
+        "001_initial_schema.sql",
+        "002_exclusao_sobreposicao.sql",
+        "003_auditoria_imutavel.sql",
+    ]
+
+    initial = (migration_dir / migration_names[0]).read_text(encoding="utf-8").upper()
+    exclusion = (migration_dir / migration_names[1]).read_text(encoding="utf-8").upper()
+    immutable = (migration_dir / migration_names[2]).read_text(encoding="utf-8").upper()
+
+    assert "CREATE TABLE IF NOT EXISTS" in initial
+    assert "ADD COLUMN IF NOT EXISTS" in initial
+    assert "CREATE INDEX IF NOT EXISTS" in initial
+    assert "CREATE EXTENSION IF NOT EXISTS BTREE_GIST" in exclusion
+    assert "DROP CONSTRAINT IF EXISTS RESERVATION_ITEMS_NO_OVERLAP" in exclusion
+    assert "EXCLUDE USING GIST" in exclusion
+    assert 'TSTZRANGE(START, "END", \'[)\')' in exclusion
+    assert "STATUS IN ('APROVADA', 'CONFIRMADA', 'EM_USO')" in exclusion
+    assert immutable.count("ADD COLUMN IF NOT EXISTS") == 3
+    assert immutable.count("DROP TRIGGER IF EXISTS") == 3
+    assert immutable.count("CREATE TRIGGER") == 3
 
 
 def test_init_db_creates_models_then_applies_migrations(monkeypatch) -> None:

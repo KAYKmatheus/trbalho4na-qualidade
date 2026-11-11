@@ -1,0 +1,188 @@
+Validacao local - 2026-11-11 - Python 3.14.8
+
+> ruff check . (ruff CLI indisponivel; equivalente executado: py -m ruff check .)
+Ruff output:
+All checks passed!
+exit code: 0
+
+> python -c "import app.main"
+Comando literal indisponivel: o alias python nao esta instalado (erro 9009).
+> py -c "import app.main" (fallback com o interpretador Python instalado)
+Import output:
+
+exit code: 0
+
+Pytest - execucao 1/2:
+============================= test session starts =============================
+platform win32 -- Python 3.14.8, pytest-8.3.3, pluggy-1.7.0
+rootdir: C:\Users\frede\Downloads\4NA QDS\trbalho4na-qualidade
+configfile: pyproject.toml
+plugins: anyio-4.16.0, bdd-7.3.0, cov-5.0.0
+collected 63 items / 3 deselected / 60 selected
+
+tests\bdd\test_alteracao_cancelamento.py ...                             [  5%]
+tests\bdd\test_api_errors.py ....                                        [ 11%]
+tests\bdd\test_aprovacoes.py .......                                     [ 23%]
+tests\bdd\test_autenticacao.py ...                                       [ 28%]
+tests\bdd\test_database.py .......                                       [ 40%]
+tests\bdd\test_delivery_config.py ...                                    [ 45%]
+tests\bdd\test_disponibilidade.py ..                                     [ 48%]
+tests\bdd\test_gherkin_coverage.py ..                                    [ 51%]
+tests\bdd\test_interface_api.py ...                                      [ 56%]
+tests\bdd\test_main.py ..                                                [ 60%]
+tests\bdd\test_manutencao.py .                                           [ 61%]
+tests\bdd\test_materiais.py ...                                          [ 66%]
+tests\bdd\test_notificacoes.py .                                         [ 68%]
+tests\bdd\test_recursos.py ...                                           [ 73%]
+tests\bdd\test_relatorios.py ...                                         [ 78%]
+tests\test_regras_dominio.py .........                                   [ 93%]
+tests\test_reservas.py ....                                              [100%]
+
+============================== warnings summary ===============================
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\testclient.py:40
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py:40: 25 warnings
+tests/bdd/test_alteracao_cancelamento.py: 9 warnings
+tests/bdd/test_api_errors.py: 27 warnings
+tests/bdd/test_aprovacoes.py: 19 warnings
+tests/bdd/test_autenticacao.py: 10 warnings
+tests/bdd/test_disponibilidade.py: 4 warnings
+tests/bdd/test_interface_api.py: 8 warnings
+tests/bdd/test_manutencao.py: 3 warnings
+tests/bdd/test_materiais.py: 7 warnings
+tests/bdd/test_notificacoes.py: 2 warnings
+tests/bdd/test_recursos.py: 6 warnings
+tests/bdd/test_relatorios.py: 9 warnings
+tests/test_reservas.py: 6 warnings
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py:40: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py:233: 21 warnings
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============== 60 passed, 3 deselected, 157 warnings in 14.13s ===============
+exit code: 0
+
+Pytest - execucao 2/2 (imediatamente apos a primeira):
+============================= test session starts =============================
+platform win32 -- Python 3.14.8, pytest-8.3.3, pluggy-1.7.0
+rootdir: C:\Users\frede\Downloads\4NA QDS\trbalho4na-qualidade
+configfile: pyproject.toml
+plugins: anyio-4.16.0, bdd-7.3.0, cov-5.0.0
+collected 63 items / 3 deselected / 60 selected
+
+tests\bdd\test_alteracao_cancelamento.py ...                             [  5%]
+tests\bdd\test_api_errors.py ....                                        [ 11%]
+tests\bdd\test_aprovacoes.py .......                                     [ 23%]
+tests\bdd\test_autenticacao.py ...                                       [ 28%]
+tests\bdd\test_database.py .......                                       [ 40%]
+tests\bdd\test_delivery_config.py ...                                    [ 45%]
+tests\bdd\test_disponibilidade.py ..                                     [ 48%]
+tests\bdd\test_gherkin_coverage.py ..                                    [ 51%]
+tests\bdd\test_interface_api.py ...                                      [ 56%]
+tests\bdd\test_main.py ..                                                [ 60%]
+tests\bdd\test_manutencao.py .                                           [ 61%]
+tests\bdd\test_materiais.py ...                                          [ 66%]
+tests\bdd\test_notificacoes.py .                                         [ 68%]
+tests\bdd\test_recursos.py ...                                           [ 73%]
+tests\bdd\test_relatorios.py ...                                         [ 78%]
+tests\test_regras_dominio.py .........                                   [ 93%]
+tests\test_reservas.py ....                                              [100%]
+
+============================== warnings summary ===============================
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\testclient.py:40
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py:40: 25 warnings
+tests/bdd/test_alteracao_cancelamento.py: 9 warnings
+tests/bdd/test_api_errors.py: 27 warnings
+tests/bdd/test_aprovacoes.py: 19 warnings
+tests/bdd/test_autenticacao.py: 10 warnings
+tests/bdd/test_disponibilidade.py: 4 warnings
+tests/bdd/test_interface_api.py: 8 warnings
+tests/bdd/test_manutencao.py: 3 warnings
+tests/bdd/test_materiais.py: 7 warnings
+tests/bdd/test_notificacoes.py: 2 warnings
+tests/bdd/test_recursos.py: 6 warnings
+tests/bdd/test_relatorios.py: 9 warnings
+tests/test_reservas.py: 6 warnings
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py:40: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py:233: 21 warnings
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============== 60 passed, 3 deselected, 157 warnings in 14.06s ===============
+exit code: 0
+
+Pytest com cobertura separada de ramos:
+............................................................             [100%]
+============================== warnings summary ===============================
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\testclient.py:40
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py:40: 25 warnings
+tests/bdd/test_alteracao_cancelamento.py: 9 warnings
+tests/bdd/test_api_errors.py: 27 warnings
+tests/bdd/test_aprovacoes.py: 19 warnings
+tests/bdd/test_autenticacao.py: 10 warnings
+tests/bdd/test_disponibilidade.py: 4 warnings
+tests/bdd/test_interface_api.py: 8 warnings
+tests/bdd/test_manutencao.py: 3 warnings
+tests/bdd/test_materiais.py: 7 warnings
+tests/bdd/test_notificacoes.py: 2 warnings
+tests/bdd/test_recursos.py: 6 warnings
+tests/bdd/test_relatorios.py: 9 warnings
+tests/test_reservas.py: 6 warnings
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py:40: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py:233: 21 warnings
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform win32, python 3.14.8-final-0 -----------
+Name                              Stmts   Miss Branch BrPart  Cover   Missing
+-----------------------------------------------------------------------------
+app\__init__.py                       0      0      0      0   100%
+app\api\__init__.py                   0      0      0      0   100%
+app\api\deps.py                      32      0      4      0   100%
+app\api\schemas.py                  128      2      4      2    97%   112, 167
+app\api\v1.py                       196     25     16      2    87%   49-50, 97, 115, 158-159, 187-188, 332, 353-356, 395-398, 421-422, 425, 441-442, 461-462, 465
+app\config.py                         8      0      0      0   100%
+app\db.py                            72      0     30      1    99%   55->61
+app\dominio\__init__.py               0      0      0      0   100%
+app\dominio\regras.py                46      7     12      5    79%   65-66, 74, 86, 98, 100, 102
+app\erros.py                          7      0      0      0   100%
+app\main.py                           4      0      2      0   100%
+app\models.py                       111      0      0      0   100%
+app\servicos\__init__.py              0      0      0      0   100%
+app\servicos\aprovacoes.py           73     11     30      8    80%   37, 52, 54, 60, 71, 82, 145, 150->157, 159-167
+app\servicos\auditoria.py            12      0      0      0   100%
+app\servicos\autenticacao.py         75      7     10      3    88%   36, 43-44, 51, 77, 84-85
+app\servicos\disponibilidade.py      44      3     24      5    88%   34, 38, 41->43, 53, 89->96
+app\servicos\manutencao.py           26      2      8      2    88%   30, 34
+app\servicos\materiais.py            57      6     16      6    84%   66, 69, 77, 90, 92, 101
+app\servicos\notificacoes.py          9      0      0      0   100%
+app\servicos\recursos.py             87      9     28      5    86%   24, 29, 31, 34, 36, 95-98
+app\servicos\relatorios.py           43      6     16      5    78%   23, 29, 47, 54->63, 75-78
+app\servicos\reservas.py            181     42     78     22    72%   45, 78, 81, 83, 85, 91, 95-96, 98, 118, 161, 170, 174, 183, 185, 247->254, 255-264, 275, 277, 290, 306->308, 323-347, 350->357, 359-367, 381-382, 417-433
+-----------------------------------------------------------------------------
+TOTAL                              1211    120    278     66    87%
+Coverage XML written to file coverage.xml
+Coverage JSON written to file coverage.json
+
+60 passed, 3 deselected, 157 warnings in 14.86s
+exit code: 0
+
+Cobertura de linhas: 90.09% (1091/1211); cobertura de ramos: 71.22% (198/278).

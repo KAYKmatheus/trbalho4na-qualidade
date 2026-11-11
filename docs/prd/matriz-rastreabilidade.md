@@ -19,7 +19,7 @@ Documentos-base: [FR e RN](./requisitos-funcionais-sistema-academico.md), [NFR](
 | 9 | Retirada e devolução | RN07 | FR-10 | | 8 | retiradas_devolucoes | CT-25 a CT-27 |
 | 10 | Histórico auditável | RN08 | FR-11 | NFR-09 | 2, 9 | auditoria | CT-28, CT-29, CT-38 |
 | 11 | Notificação simulada | | FR-12 | | 9 | notificacoes | CT-30 |
-| 12 | Relatórios | RN08 | FR-13 | NFR-04 | 10 | auditoria, reserva_itens | CT-31, CT-32, CT-38 |
+| 12 | Relatórios | RN08 | FR-13 | NFR-04 | 10 | auditoria, reserva_itens | CT-31, CT-32 |
 | 13 | Interface responsiva e mensagens compreensíveis | | FR-14 | NFR-06, NFR-07, NFR-08 | todos | | CT-33, CT-34 |
 | 14 | Documentação da API ou dos fluxos | | FR-15 | NFR-10 | todos | | CT-35 |
 
@@ -52,17 +52,17 @@ Documentos-base: [FR e RN](./requisitos-funcionais-sistema-academico.md), [NFR](
 
 | Tarefa | FR / CT | Implementação | Testes / validação |
 |---|---|---|---|
-| 23 — Autenticação e papéis | FR-01; CT-01 a CT-05 | `app/api/deps.py`, `app/servicos/autenticacao.py`, rotas em `app/api/v1.py` | `test_autenticacao.py`, `test_alteracao_cancelamento.py`, `test_aprovacoes.py` |
-| 24 — Recursos e escopo | FR-02, RN09; CT-06, CT-07, CT-40 | `app/servicos/recursos.py`, modelo `Resource`, auditoria e rotas administrativas | `test_recursos.py`, `test_api_errors.py` |
-| 25 — Disponibilidade | FR-03; CT-08, CT-09 | `app/servicos/disponibilidade.py` e `/v1/resources/search` | `test_disponibilidade.py` |
-| 26 — Alterar, cancelar e transições | FR-05; CT-13, CT-14 | `app/servicos/reservas.py`, regras de estado e rotas de reserva | `test_alteracao_cancelamento.py`, `test_regras_dominio.py` |
-| 27 — Aprovação e validação docente | FR-08, FR-16; CT-21 a CT-23, CT-36, CT-37, CT-39 | `app/servicos/aprovacoes.py` e decisão por item | `test_aprovacoes.py` |
-| 28 — Manutenção | FR-09; CT-24 | `app/servicos/manutencao.py` e bloqueios de recurso | `test_manutencao.py`, `test_api_errors.py` |
-| 29 — Movimentação de materiais | FR-10; CT-25 a CT-27 | `app/servicos/materiais.py`, saldo pendente e indisponibilidade | `test_materiais.py` |
-| 30 — Notificações simuladas | FR-12; CT-30 | `app/servicos/notificacoes.py`, sem integração externa | `test_notificacoes.py` |
-| 31 — Relatórios/conflitos | FR-11, FR-13; CT-31, CT-32, CT-38 | `app/servicos/relatorios.py`, eventos de auditoria | `test_relatorios.py` |
-| 32 — Interface, erros e OpenAPI | FR-14, FR-15; CT-33 a CT-35 | Dashboard em `app/api/v1.py` e contrato OpenAPI do FastAPI | `test_interface_api.py`, `test_api_errors.py` |
-| 33 — Contêiner e CI | NFR; gates de qualidade | `Dockerfile`, `.github/workflows/ci.yml`, `sonar-project.properties` | `test_delivery_config.py`; cobertura em [relatório](../qualidade/relatorio-cobertura.md) |
+| 23 — Autenticação e papéis | FR-01; CT-01 a CT-05 | `app/api/deps.py`, `app/servicos/autenticacao.py`, rotas em `app/api/v1.py` | `tests/bdd/test_autenticacao.py`, `tests/bdd/test_alteracao_cancelamento.py`, `tests/bdd/test_aprovacoes.py` |
+| 24 — Recursos e escopo | FR-02, RN09; CT-06, CT-07, CT-40 | `app/servicos/recursos.py`, modelo `Resource`, auditoria e rotas administrativas | `tests/bdd/test_recursos.py`, `tests/bdd/test_api_errors.py` |
+| 25 — Disponibilidade | FR-03; CT-08, CT-09 | `app/servicos/disponibilidade.py` e `/v1/resources/search` | `tests/bdd/test_disponibilidade.py` |
+| 26 — Alterar, cancelar e transições | FR-05; CT-13, CT-14 | `app/servicos/reservas.py`, regras de estado e rotas de reserva | `tests/bdd/test_alteracao_cancelamento.py`, `tests/test_regras_dominio.py` |
+| 27 — Aprovação e validação docente | FR-08, FR-16; CT-21 a CT-23, CT-36, CT-37, CT-39 | `app/servicos/aprovacoes.py` e decisão por item | `tests/bdd/test_aprovacoes.py` |
+| 28 — Manutenção | FR-09; CT-24 | `app/servicos/manutencao.py` e bloqueios de recurso | `tests/bdd/test_manutencao.py`, `tests/bdd/test_api_errors.py` |
+| 29 — Movimentação de materiais | FR-10; CT-25 a CT-27 | `app/servicos/materiais.py`, saldo pendente e indisponibilidade | `tests/bdd/test_materiais.py` |
+| 30 — Notificações simuladas | FR-12; CT-30 | `app/servicos/notificacoes.py`, sem integração externa | `tests/bdd/test_notificacoes.py` |
+| 31 — Relatórios/conflitos | FR-11, FR-13; CT-31, CT-32, CT-38 | `app/servicos/relatorios.py`, eventos de auditoria | `tests/bdd/test_relatorios.py` |
+| 32 — Interface, erros e OpenAPI | FR-14, FR-15; CT-33 a CT-35 | Dashboard em `app/api/v1.py` e contrato OpenAPI do FastAPI | `tests/bdd/test_interface_api.py`, `tests/bdd/test_api_errors.py` |
+| 33 — Contêiner e CI | NFR; gates de qualidade | `Dockerfile`, `.github/workflows/ci.yml`, `sonar-project.properties` | `tests/bdd/test_delivery_config.py`; cobertura em [relatório](../qualidade/relatorio-cobertura.md) |
 | 34 — Desempenho | NFR-04 | Plano [JMeter](../../tests/desempenho/reservas.jmx) | XML validado; execução de carga pendente |
 
 O estado detalhado das execuções e das validações pendentes está no

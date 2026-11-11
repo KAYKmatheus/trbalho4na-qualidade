@@ -1,20 +1,19 @@
 
 
-# Environment & Secrets (AIOX)
+# Ambiente e segredos
 .env
 .env.local
 .env.*.local
 *.key
 *.pem
 
-# Dependencies (AIOX)
+# Dependências
 node_modules/
-node_modules
 .venv/
 .ruff_cache/
 *.egg-info/
 
-# Python
+# Python e cobertura
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -27,19 +26,19 @@ tests/desempenho/reservas.csv
 tests/desempenho/*.jtl
 tests/desempenho/relatorio-html/
 
-# Build & Logs (AIOX)
+# Build e logs
 dist/
 build/
 *.log
 logs/
 
-# IDE & OS (AIOX)
+# IDE e sistema operacional
 .DS_Store
 Thumbs.db
 .idea/
 *.swp
 
-# AIOX Local (AIOX)
+# Configuração local do AIOX
 .aiox-core/local/
 .claude/settings.local.json
 .aiox/install-log.txt

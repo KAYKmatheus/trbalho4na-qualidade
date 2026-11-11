@@ -1,6 +1,7 @@
 # Casos de teste
 
-Severidade: A = Alta, M = Média, B = Baixa. Resultado inicial de todos: **Não executado**.
+Severidade: A = Alta, M = Média, B = Baixa. A execução é registrada apenas
+quando houver evidência correspondente em `docs/qualidade/evidencias/`.
 
 | ID | Requisito | RN / NFR | Cenário | Resultado esperado | Sev. |
 |---|---|---|---|---|---|
@@ -49,4 +50,38 @@ Severidade: A = Alta, M = Média, B = Baixa. Resultado inicial de todos: **Não 
 
 | CT | Data | Executor | Resultado | Evidência | Defeito |
 |---|---|---|---|---|---|
-| | | | | | |
+| CT-01 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-02 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-03 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-04 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-05 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-06 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-07 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-08 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-09 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-10 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-11 | 2026-11-11 | Local | Parcial — payload inválido; critérios de campo não cobertos integralmente | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-13 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-14 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-15 | 2026-11-11 | Local | Parcial — conflito verificado no serviço, não pelo código HTTP da rota | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-18 | 2026-11-11 | Local | Parcial — regra de saldo unitária, sem fluxo de reserva | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-20 | 2026-11-11 | Local | Parcial — regra unitária de saldo; disputa concorrente não executada | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-21 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-22 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-23 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-24 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-25 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-26 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-27 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-28 | 2026-11-11 | Local | Parcial — criação auditada; ciclo completo não verificado neste teste | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-30 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-31 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-32 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-33 | 2026-11-11 | Local | Parcial — validação/autenticação; demais classes de erro não cobertas integralmente | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-34 | 2026-11-11 | Local | Parcial — baseline HTML/CSS; viewport e teclado reais pendentes | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-35 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-36 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-37 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-38 | 2026-11-11 | Local | Parcial — evento verificado para conflito de sala; demais causas pendentes | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-39 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-40 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |

@@ -15,21 +15,38 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 ```
 ├── app/
 │   ├── api/
+│   │   ├── deps.py
+│   │   ├── schemas.py
 │   │   └── v1.py
 │   ├── dominio/
 │   │   └── regras.py
 │   ├── servicos/
+│   │   ├── aprovacoes.py
+│   │   ├── autenticacao.py
+│   │   ├── disponibilidade.py
+│   │   ├── manutencao.py
+│   │   ├── materiais.py
+│   │   ├── notificacoes.py
+│   │   ├── recursos.py
+│   │   ├── relatorios.py
 │   │   └── reservas.py
 │   ├── config.py
 │   ├── db.py
+│   ├── erros.py
 │   ├── main.py
 │   └── models.py
 ├── migrations/
-│   └── 001_initial_schema.sql
+│   ├── 001_initial_schema.sql
+│   ├── 002_exclusao_sobreposicao.sql
+│   └── 003_auditoria_imutavel.sql
 ├── tests/
 │   ├── test_concorrencia.py
 │   ├── test_regras_dominio.py
-│   └── test_reservas.py
+│   ├── test_reservas.py
+│   └── bdd/
+│       ├── features/
+│       ├── gherkin_steps.py
+│       └── test_*.py
 ├── docs/
 │   ├── prd/
 │   │   ├── personas/
@@ -62,7 +79,8 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 
 **Prompt:** _(cole aqui o prompt literal usado)_
 
-**Resultado:** `docs/prd/requisitos-funcionais-sistema-academico.md` com RN01 a RN08 e FR-01 a FR-15, cada FR com critérios de aceite.
+**Resultado atual:** `docs/prd/requisitos-funcionais-sistema-academico.md`
+com RN01 a RN10 e FR-01 a FR-16, cada FR com critérios de aceite.
 
 **Aprendizado:** critérios de aceite escritos junto com o requisito viram casos de teste quase diretos.
 
@@ -70,7 +88,8 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 
 **Prompt:** _(cole aqui o prompt literal usado)_
 
-**Resultado:** `docs/prd/requisitos-nao-funcionais-sistema-academico.md` com NFR-01 a NFR-10 e metas marcadas como proposta.
+**Resultado atual:** `docs/prd/requisitos-nao-funcionais-sistema-academico.md`
+com NFR-01 a NFR-12 e metas marcadas como proposta.
 
 **Aprendizado:** metas numéricas ainda não aprovadas devem ser identificadas como propostas.
 
@@ -86,7 +105,7 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 
 **Prompt:** "Complete as personas com jornadas, crie os fluxos de sequência em Mermaid, a matriz de rastreabilidade e a pasta qualidade com plano de testes, casos de teste, segurança e desempenho."
 
-**Resultado:** jornadas nas três personas, `docs/prd/fluxos-sequencia.md` (10 diagramas), `docs/prd/matriz-rastreabilidade.md` (com lacunas encontradas) e `docs/qualidade/` (36 casos de teste, CT-01 a CT-36).
+**Resultado inicial:** jornadas nas três personas, `docs/prd/fluxos-sequencia.md` (10 diagramas), `docs/prd/matriz-rastreabilidade.md` (com lacunas encontradas) e `docs/qualidade/` (40 casos de teste, CT-01 a CT-40).
 
 **Aprendizado:** a matriz de rastreabilidade revela lacunas entre documentos, como o indicador de conflitos evitados sem local de registro.
 
@@ -100,9 +119,9 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 
 ## Próximos passos
 
-1. Implementar migrações e garantias de concorrência no PostgreSQL.
-2. Completar e validar os modelos, serviços e API.
-3. Executar os testes com PostgreSQL e arquivar as evidências.
+1. Validar as migrações e garantias de concorrência em PostgreSQL.
+2. Executar os testes de integração e concorrência no banco real.
+3. Executar o plano JMeter em ambiente de teste e arquivar as evidências.
 
 ## Passo 7 — Base da aplicação
 
@@ -120,3 +139,14 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 **Resultado:** reorganização dos módulos em `app/`, configuração única da engine e sessão em `app/db.py`, dependências centralizadas em `pyproject.toml`, e configuração do ambiente documentada em `.env.example` e neste README.
 
 **Aprendizado:** separar a criação da engine da lógica dos serviços torna a sessão compartilhável e testável por dependência.
+
+## Passo 8 — Funcionalidades e qualidade
+
+**Resultado:** autenticação e autorização por perfil, gestão de recursos e
+escopos, disponibilidade, ciclo de vida de reservas, aprovações, manutenção,
+movimentação de materiais, notificações simuladas, relatórios e contrato
+OpenAPI. Os testes estão em `tests/` e `tests/bdd/`, associados aos 40 CTs.
+
+**Validação restante:** o conjunto local e as metas de cobertura são medidos no
+[relatório de cobertura](./docs/qualidade/relatorio-cobertura.md). PostgreSQL,
+Docker e JMeter devem ser validados no ambiente que os disponibilize.

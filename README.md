@@ -1,4 +1,4 @@
-# Sistema acadêmico de alocação de recursos
+# AlocaSenac — Sistema acadêmico de alocação de recursos
 
 Sistema para consultar e alocar salas, professores e materiais sem conflitos de
 horário.
@@ -15,7 +15,15 @@ horário.
 ## Documentação
 
 - [Personas](./docs/prd/personas-sistema-academico.md)
+- [Requisitos funcionais e regras de negócio](./docs/prd/requisitos-funcionais-sistema-academico.md)
+- [Requisitos não funcionais](./docs/prd/requisitos-nao-funcionais-sistema-academico.md)
 - [Modelagem de dados (DBML)](./docs/prd/modelagem-dados-sistema-academico.dbml)
+- [Fluxos de sequência](./docs/prd/fluxos-sequencia.md)
+- [Matriz de rastreabilidade](./docs/prd/matriz-rastreabilidade.md)
+- [Plano e casos de teste](./docs/qualidade/plano-de-testes.md) e
+  [casos de teste CT-01 a CT-40](./docs/qualidade/casos-de-teste.md)
+- [Segurança](./docs/qualidade/seguranca.md), [desempenho](./docs/qualidade/desempenho.md)
+  e [relatório de cobertura](./docs/qualidade/relatorio-cobertura.md)
 
 ## Desenvolvimento
 

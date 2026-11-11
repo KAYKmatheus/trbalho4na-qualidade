@@ -2,7 +2,15 @@
 
 from datetime import datetime, timezone
 
-from app.dominio.regras import is_overlapping_interval, material_stock_available
+import pytest
+
+from app.dominio.regras import (
+    StatusReserva,
+    is_overlapping_interval,
+    material_stock_available,
+    transition_reservation_status,
+)
+from app.erros import ValidationError
 
 
 def test_interval_overlap_rule_detects_conflict() -> None:
@@ -26,3 +34,22 @@ def test_material_stock_is_rejected_when_exceeded() -> None:
     assert material_stock_available(available=5, reserved=3, requested=2) is True
     assert material_stock_available(available=5, reserved=3, requested=3) is False
     assert material_stock_available(available=4, reserved=3, requested=2) is False
+
+
+@pytest.mark.parametrize(
+    ("current", "target"),
+    [
+        (StatusReserva.SOLICITADA, StatusReserva.PENDENTE),
+        (StatusReserva.PENDENTE, StatusReserva.APROVADA),
+        (StatusReserva.APROVADA, StatusReserva.CONFIRMADA),
+        (StatusReserva.CONFIRMADA, StatusReserva.EM_USO),
+        (StatusReserva.EM_USO, StatusReserva.CONCLUIDA),
+    ],
+)
+def test_reservation_status_transition_follows_the_confirmed_lifecycle(current, target) -> None:
+    assert transition_reservation_status(current, target) is target
+
+
+def test_final_reservation_status_cannot_transition() -> None:
+    with pytest.raises(ValidationError):
+        transition_reservation_status(StatusReserva.CANCELADA, StatusReserva.PENDENTE)

@@ -12,7 +12,8 @@ from sqlalchemy.pool import StaticPool
 
 from app.db import get_db
 from app.erros import ConflictError
-from app.models import AuditEntry, Base, Reservation, ReservationItem
+from app.models import AuditEntry, Base, Reservation, ReservationItem, User
+from app.servicos.autenticacao import hash_password
 from app.servicos.reservas import ReservationService
 
 
@@ -57,7 +58,7 @@ def test_service_creates_reservation_and_audit_record(db_session) -> None:
 def test_service_rejects_conflicting_room_reservation(db_session) -> None:
     """Verifica FR-07, RN04, NFR-03, CT-19."""
     service = ReservationService(db_session)
-    service.create_reservation(
+    reservation = service.create_reservation(
         solicitante_id="user-1",
         reason="Primeira reserva",
         items=[
@@ -69,6 +70,8 @@ def test_service_rejects_conflicting_room_reservation(db_session) -> None:
             }
         ],
     )
+    db_session.query(ReservationItem).filter_by(reservation_id=reservation.id).one().status = "CONFIRMADA"
+    db_session.commit()
 
     with pytest.raises(ConflictError):
         service.create_reservation(
@@ -85,17 +88,35 @@ def test_service_rejects_conflicting_room_reservation(db_session) -> None:
         )
 
 
-def test_api_v1_responds_to_creation_endpoint(db_session) -> None:
+def test_api_v1_responds_to_creation_endpoint(db_session, monkeypatch: pytest.MonkeyPatch) -> None:
     """Verifica FR-04, FR-14, NFR-06, CT-10 e CT-33."""
     from app.api.v1 import app
+
+    monkeypatch.setenv("AUTH_SECRET_KEY", "test-secret-key-with-enough-entropy")
+    db_session.add(
+        User(
+            id="user-1",
+            name="Solicitante",
+            email="user-1@example.test",
+            password_hash=hash_password("password-1"),
+            role="SOLICITANTE",
+            active=True,
+        )
+    )
+    db_session.commit()
 
     def override_get_db():
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
     try:
+        token_response = TestClient(app).post(
+            "/v1/auth/login",
+            json={"email": "user-1@example.test", "password": "password-1"},
+        )
         response = TestClient(app).post(
             "/v1/reservations",
+            headers={"Authorization": f"Bearer {token_response.json()['access_token']}"},
             json={
                 "solicitante_id": "user-1",
                 "reason": "Reserva de aula",
@@ -114,7 +135,7 @@ def test_api_v1_responds_to_creation_endpoint(db_session) -> None:
 
     assert response.status_code == 201
     payload = response.json()
-    assert payload["status"] == "PENDENTE"
+    assert payload["status"] == "CONFIRMADA"
     assert payload["items"][0]["resource_type"] == "sala"
 
 

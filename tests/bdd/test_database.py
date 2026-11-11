@@ -74,7 +74,7 @@ def test_migration_set_is_three_idempotent_subject_migrations() -> None:
     assert "DROP CONSTRAINT IF EXISTS RESERVATION_ITEMS_NO_OVERLAP" in exclusion
     assert "EXCLUDE USING GIST" in exclusion
     assert 'TSTZRANGE(START, "END", \'[)\')' in exclusion
-    assert "STATUS IN ('APROVADA', 'CONFIRMADA', 'EM_USO')" in exclusion
+    assert "STATUS IN ('APROVADA', 'CONFIRMADA', 'EM_USO') AND RESOURCE_TYPE <> 'MATERIAL'" in exclusion
     assert immutable.count("ADD COLUMN IF NOT EXISTS") == 3
     assert immutable.count("DROP TRIGGER IF EXISTS") == 3
     assert immutable.count("CREATE TRIGGER") == 3

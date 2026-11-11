@@ -9,4 +9,4 @@ ALTER TABLE reservation_items
         resource_type WITH =,
         resource_id WITH =,
         tstzrange(start, "end", '[)') WITH &&
-    ) WHERE (status IN ('APROVADA', 'CONFIRMADA', 'EM_USO'));
+    ) WHERE (status IN ('APROVADA', 'CONFIRMADA', 'EM_USO') AND resource_type <> 'material');

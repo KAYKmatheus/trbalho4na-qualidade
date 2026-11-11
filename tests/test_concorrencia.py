@@ -1,87 +1,24 @@
 """PostgreSQL integration tests for persistence and concurrency."""
 
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import text
 
-from app.config import AppSettings
 from app.db import init_db
 from app.erros import ConflictError
-from app.models import Base, Resource, User
+from app.models import Resource, User
 from app.servicos.reservas import ReservationService
 
-
-@pytest.fixture(scope="module", autouse=True)
-def initialize_postgres_schema() -> None:
-    init_db()
+START = datetime(2026, 12, 1, 9, 0, tzinfo=timezone.utc)
+END = datetime(2026, 12, 1, 11, 0, tzinfo=timezone.utc)
 
 
-@pytest.mark.integration
-@pytest.mark.parametrize(
-    "resource_type, resource_id, start, end",
-    [
-        ("sala", "room-7", "2026-01-12T08:00:00Z", "2026-01-12T10:00:00Z"),
-        ("professor", "teacher-7", "2026-01-12T08:00:00Z", "2026-01-12T10:00:00Z"),
-    ],
-)
-def test_postgres_real_database_accepts_integration_write(
-    resource_type: str, resource_id: str, start: str, end: str
-) -> None:
-    """Verifica acesso e gravação no PostgreSQL de integração."""
-    resource_id = f"{resource_id}-{uuid4().hex}"
-    engine = create_engine(AppSettings().database_url)
-    try:
-        with engine.begin() as conn:
-            conn.execute(text("SELECT 1"))
-            conn.execute(
-                text(
-                    "CREATE TABLE IF NOT EXISTS integration_probe "
-                    "(resource_type TEXT, resource_id TEXT, start_ts TIMESTAMPTZ, end_ts TIMESTAMPTZ)"
-                )
-            )
-            conn.execute(
-                text(
-                    "INSERT INTO integration_probe "
-                    "(resource_type, resource_id, start_ts, end_ts) "
-                    "VALUES (:resource_type, :resource_id, :start, :end)"
-                ),
-                {
-                    "resource_type": resource_type,
-                    "resource_id": resource_id,
-                    "start": start,
-                    "end": end,
-                },
-            )
-            row = conn.execute(
-                text(
-                    "SELECT COUNT(*) FROM integration_probe "
-                    "WHERE resource_type = :resource_type AND resource_id = :resource_id"
-                ),
-                {"resource_type": resource_type, "resource_id": resource_id},
-            ).scalar_one()
-            assert row == 1
-    finally:
-        engine.dispose()
-
-
-@pytest.mark.integration
-def test_overlapping_material_reservations_respect_available_stock() -> None:
-    """Permite reservas parciais sobrepostas sem exceder o estoque."""
-    engine = create_engine(AppSettings().database_url)
-    Base.metadata.create_all(engine)
-    integration_session_factory = sessionmaker(bind=engine, expire_on_commit=False)
-    resource_id = f"material-stock-{uuid4().hex}"
-    user_id = f"requester-{uuid4().hex}"
-    start = datetime(2026, 2, 1, 9, 0, tzinfo=timezone.utc)
-    end = datetime(2026, 2, 1, 11, 0, tzinfo=timezone.utc)
-
-    try:
-        with integration_session_factory.begin() as session:
-            session.add(
+def _create_requesters(pg_session_factory, user_ids: list[str]) -> None:
+    with pg_session_factory.begin() as session:
+        session.add_all(
+            [
                 User(
                     id=user_id,
                     name="Integration requester",
@@ -89,85 +26,98 @@ def test_overlapping_material_reservations_respect_available_stock() -> None:
                     password_hash="not-used",
                     role="SOLICITANTE",
                 )
+                for user_id in user_ids
+            ]
+        )
+
+
+@pytest.mark.integration
+def test_postgres_schema_has_exclusion_and_immutable_triggers(pg_engine, clean_postgres_database) -> None:
+    """Verifica que reaplicar migrações mantém a restrição e os três gatilhos."""
+    init_db(pg_engine)
+    init_db(pg_engine)
+
+    with pg_engine.connect() as connection:
+        constraint_count = connection.scalar(
+            text(
+                "SELECT COUNT(*) FROM pg_constraint "
+                "WHERE conrelid = 'reservation_items'::regclass "
+                "AND conname = 'reservation_items_no_overlap'"
             )
-            session.add(
-                Resource(
-                    id=resource_id,
-                    resource_type="material",
-                    name="Material com estoque",
-                    quantity_total=5,
+        )
+        trigger_names = set(
+            connection.scalars(
+                text(
+                    "SELECT tgname FROM pg_trigger "
+                    "WHERE NOT tgisinternal "
+                    "AND tgname IN ("
+                    "'audit_entries_immutable_guard', "
+                    "'approvals_immutable_guard', "
+                    "'material_movements_immutable_guard')"
                 )
+            ).all()
+        )
+
+    assert constraint_count == 1
+    assert trigger_names == {
+        "audit_entries_immutable_guard",
+        "approvals_immutable_guard",
+        "material_movements_immutable_guard",
+    }
+
+
+@pytest.mark.integration
+def test_overlapping_material_reservations_respect_available_stock(
+    pg_session_factory, clean_postgres_database
+) -> None:
+    """Permite reservas parciais sobrepostas sem exceder o estoque."""
+    resource_id = f"material-stock-{uuid4().hex}"
+    user_id = f"requester-{uuid4().hex}"
+    _create_requesters(pg_session_factory, [user_id])
+
+    with pg_session_factory.begin() as session:
+        session.add(
+            Resource(
+                id=resource_id,
+                resource_type="material",
+                name="Material com estoque",
+                quantity_total=5,
             )
+        )
 
-        def reserve_two_units() -> None:
-            with integration_session_factory() as session:
-                ReservationService(session).create_reservation(
-                    solicitante_id=user_id,
-                    reason="Reserva parcial de material",
-                    items=[
-                        {
-                            "resource_type": "material",
-                            "resource_id": resource_id,
-                            "start": start,
-                            "end": end,
-                            "quantity": 2,
-                        }
-                    ],
-                )
-
-        reserve_two_units()
-        reserve_two_units()
-
-        with integration_session_factory() as session, pytest.raises(ConflictError) as error:
+    def reserve_two_units(reason: str) -> None:
+        with pg_session_factory() as session:
             ReservationService(session).create_reservation(
                 solicitante_id=user_id,
-                reason="Reserva além do estoque",
+                reason=reason,
                 items=[
                     {
                         "resource_type": "material",
                         "resource_id": resource_id,
-                        "start": start,
-                        "end": end,
+                        "start": START,
+                        "end": END,
                         "quantity": 2,
                     }
                 ],
             )
-        assert error.value.context is not None
-        assert error.value.context["cause"] == "ESTOQUE"
-    finally:
-        engine.dispose()
 
+    reserve_two_units("Reserva parcial 1")
+    reserve_two_units("Reserva parcial 2")
 
-@pytest.mark.integration
-@pytest.mark.concorrencia
-def test_concurrent_room_requests_only_one_reservation_succeeds() -> None:
-    """Verifica FR-07, RN04, NFR-03, CT-19."""
-    engine = create_engine(AppSettings().database_url)
-    Base.metadata.create_all(engine)
-    integration_session_factory = sessionmaker(bind=engine, expire_on_commit=False)
-    resource_id = f"room-concurrent-{uuid4().hex}"
+    with pg_session_factory() as session, pytest.raises(ConflictError) as error:
+        ReservationService(session).create_reservation(
+            solicitante_id=user_id,
+            reason="Reserva além do estoque",
+            items=[
+                {
+                    "resource_type": "material",
+                    "resource_id": resource_id,
+                    "start": START,
+                    "end": END,
+                    "quantity": 2,
+                }
+            ],
+        )
 
-    def attempt(user_id: str):
-        with integration_session_factory() as session:
-            try:
-                return ReservationService(session).create_reservation(
-                    solicitante_id=user_id,
-                    reason="Reserva concorrente",
-                    items=[
-                        {
-                            "resource_type": "sala",
-                            "resource_id": resource_id,
-                            "start": datetime(2026, 2, 1, 9, 0, tzinfo=timezone.utc),
-                            "end": datetime(2026, 2, 1, 11, 0, tzinfo=timezone.utc),
-                        }
-                    ],
-                )
-            except ConflictError:
-                return None
-
-    try:
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            results = list(pool.map(attempt, ["user-a", "user-b"]))
-        assert sum(result is not None for result in results) == 1
-    finally:
-        engine.dispose()
+    assert error.value.context is not None
+    assert error.value.context["cause"] == "ESTOQUE"

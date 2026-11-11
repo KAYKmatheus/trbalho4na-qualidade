@@ -26,9 +26,9 @@ def test_split_sql_statements_skips_empty_parts_and_keeps_tail() -> None:
 
 
 def test_migrations_are_skipped_for_non_postgres(monkeypatch) -> None:
-    monkeypatch.setattr(database, "engine", SimpleNamespace(dialect=SimpleNamespace(name="sqlite")))
+    target_engine = SimpleNamespace(dialect=SimpleNamespace(name="sqlite"))
 
-    database._apply_sql_migrations()
+    database._apply_sql_migrations(target_engine)
 
 
 def test_migrations_execute_each_postgres_statement(monkeypatch) -> None:
@@ -45,9 +45,9 @@ def test_migrations_execute_each_postgres_statement(monkeypatch) -> None:
         def begin(self):
             yield Connection()
 
-    monkeypatch.setattr(database, "engine", Engine())
+    target_engine = Engine()
 
-    database._apply_sql_migrations()
+    database._apply_sql_migrations(target_engine)
 
     assert len(executed) >= 7
     assert all(statement.strip() for statement in executed)
@@ -83,12 +83,23 @@ def test_migration_set_is_three_idempotent_subject_migrations() -> None:
 def test_init_db_creates_models_then_applies_migrations(monkeypatch) -> None:
     calls = []
     monkeypatch.setattr(Base.metadata, "create_all", lambda bind: calls.append(("create", bind)))
-    monkeypatch.setattr(database, "engine", "test-engine")
-    monkeypatch.setattr(database, "_apply_sql_migrations", lambda: calls.append(("migrate", None)))
+    monkeypatch.setattr(database, "_default_engine", "test-engine")
+    monkeypatch.setattr(database, "_apply_sql_migrations", lambda bind: calls.append(("migrate", bind)))
 
     database.init_db()
 
-    assert calls == [("create", "test-engine"), ("migrate", None)]
+    assert calls == [("create", "test-engine"), ("migrate", "test-engine")]
+
+
+def test_init_db_uses_supplied_engine(monkeypatch) -> None:
+    calls = []
+    supplied_engine = object()
+    monkeypatch.setattr(Base.metadata, "create_all", lambda bind: calls.append(("create", bind)))
+    monkeypatch.setattr(database, "_apply_sql_migrations", lambda bind: calls.append(("migrate", bind)))
+
+    database.init_db(supplied_engine)
+
+    assert calls == [("create", supplied_engine), ("migrate", supplied_engine)]
 
 
 def test_get_db_closes_request_session(monkeypatch) -> None:

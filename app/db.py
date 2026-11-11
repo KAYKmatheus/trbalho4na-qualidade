@@ -5,14 +5,16 @@ from collections.abc import Generator
 from pathlib import Path
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import AppSettings
 
 settings = AppSettings()
-engine = create_engine(settings.database_url, future=True)
+_default_engine = create_engine(settings.database_url, future=True)
+engine = _default_engine
 SessionLocal = sessionmaker(
-    bind=engine,
+    bind=_default_engine,
     autoflush=False,
     autocommit=False,
     expire_on_commit=False,
@@ -20,7 +22,7 @@ SessionLocal = sessionmaker(
 )
 
 
-def _apply_sql_migrations() -> None:
+def _apply_sql_migrations(engine: Engine) -> None:
     """Apply incremental SQL migrations in the project order when the engine targets PostgreSQL."""
     if engine.dialect.name != "postgresql":
         return
@@ -84,12 +86,13 @@ def _split_sql_statements(sql_text: str) -> list[str]:
     return statements
 
 
-def init_db() -> None:
+def init_db(engine: Engine | None = None) -> None:
     """Create the application schema and apply ordered SQL migrations."""
     from app.models import Base
 
-    Base.metadata.create_all(bind=engine)
-    _apply_sql_migrations()
+    target_engine = engine if engine is not None else _default_engine
+    Base.metadata.create_all(bind=target_engine)
+    _apply_sql_migrations(target_engine)
 
 
 def get_db() -> Generator[Session, None, None]:

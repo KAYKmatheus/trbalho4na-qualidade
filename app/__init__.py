@@ -1,0 +1,1 @@
+"""AlocaSenac application package."""

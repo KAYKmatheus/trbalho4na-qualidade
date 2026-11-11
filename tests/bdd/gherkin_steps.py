@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
-import re
-
 
 CT_MARKER = re.compile(r"^\s*#\s*Equivale a:\s*(CT-\d{2})\s*$")
 SCENARIO = re.compile(r"^\s*Cenário(?:\s+de\s+fundo)?:\s*(.+)$")

@@ -2,14 +2,25 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
+from fastapi import Depends, FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
+from sqlalchemy.orm import Session
 
-from app_config import AppSettings
-from errors import ConflictError, ValidationError
-from services import ReservationService
+from app.db import get_db, init_db
+from app.erros import ConflictError, ValidationError
+from app.servicos.reservas import ReservationService
 
-app = FastAPI(title="AlocaSenac API", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    init_db()
+    yield
+
+
+app = FastAPI(title="AlocaSenac API", version="0.1.0", lifespan=lifespan)
 
 
 @app.get("/")
@@ -38,8 +49,8 @@ def health() -> dict:
 
 
 @app.post("/v1/reservations")
-def create_reservation(payload: dict) -> JSONResponse:
-    service = ReservationService(AppSettings())
+def create_reservation(payload: dict, session: Session = Depends(get_db)) -> JSONResponse:
+    service = ReservationService(session)
     try:
         reservation = service.create_reservation(
             solicitante_id=payload["solicitante_id"],

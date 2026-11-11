@@ -1,6 +1,9 @@
 """Project configuration and settings for the academic reservation system."""
 
-from dataclasses import dataclass
+import os
+from dataclasses import dataclass, field
+
+DEFAULT_DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac"
 
 
 @dataclass(frozen=True)
@@ -12,5 +15,6 @@ class AppSettings:
     the NFRs.
     """
 
-    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac"
+    database_url: str = field(default_factory=lambda: os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL))
     app_name: str = "alocasenac"
+    app_env: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))

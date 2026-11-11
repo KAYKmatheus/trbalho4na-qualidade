@@ -13,9 +13,23 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 ## Estrutura final
 
 ```
-├── AGENTS.md
-├── README.md
-├── tutorial.md
+├── app/
+│   ├── api/
+│   │   └── v1.py
+│   ├── dominio/
+│   │   └── regras.py
+│   ├── servicos/
+│   │   └── reservas.py
+│   ├── config.py
+│   ├── db.py
+│   ├── main.py
+│   └── models.py
+├── migrations/
+│   └── 001_initial_schema.sql
+├── tests/
+│   ├── test_concorrencia.py
+│   ├── test_regras_dominio.py
+│   └── test_reservas.py
 ├── docs/
 │   ├── prd/
 │   │   ├── personas/
@@ -86,8 +100,23 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 
 ## Próximos passos
 
-1. Decidir as lacunas listadas na matriz de rastreabilidade.
-2. Definir a pilha tecnológica.
-3. Wireframes responsivos.
-4. Especificação OpenAPI (FR-15).
-5. Implementação e execução dos testes, arquivando as evidências.
+1. Implementar migrações e garantias de concorrência no PostgreSQL.
+2. Completar e validar os modelos, serviços e API.
+3. Executar os testes com PostgreSQL e arquivar as evidências.
+
+## Passo 7 — Base da aplicação
+
+**Prompt:**
+
+> ## Bloco A: base do projeto (tarefas 1 a 4)
+>
+> 1. **Arquivos de configuração.** Em `.gitignore`, acrescente as entradas de Python (`__pycache__/`, `*.pyc`, `.venv/`, `.pytest_cache/`, `.coverage`, `htmlcov/`, `reports/`) e remova do índice do git qualquer arquivo gerado. Reescreva `.env.example` com as variáveis reais do projeto (URL do banco, ambiente) no lugar do conteúdo genérico do AIOX. Substitua `AGENTS.md` pelo conteúdo de `AGENTS.proposta.md` e apague o `.proposta`.
+> 2. **Reorganização.** Aplique a tabela "Estrutura-alvo" com `git mv`, ajuste todos os imports e confirme que `python -c "import app.main"` funciona antes de seguir.
+> 3. **Configuração e banco únicos.** Hoje `ReservationService.__init__` chama `configure_database` a cada instância e `api_v1.py` cria `ReservationService(AppSettings())` dentro da rota. Crie `app/db.py` com engine e `sessionmaker` criados uma vez (com `expire_on_commit=False`), uma função `init_db()` e uma dependência FastAPI que entrega a sessão. Alinhe o nome do banco: o padrão de `app_config.py` é `alocasenac` e o `docker-compose.yml` cria `alocasenac_test`. Escolha um padrão claro (`alocasenac` para desenvolvimento, `alocasenac_test` só nos testes) e registre no README. Remova `execute_sql`, que não é usada.
+> 4. **Dependências e marcadores.** Em `pyproject.toml`, registre os marcadores `integration` e `concorrencia` e a configuração do `pytest` e do `ruff`. Em `requirements.txt`, remova `alembic` e `jinja2` se não forem usados (ou use-os de verdade) e acrescente `pytest-cov`, `pytest-bdd` e `testcontainers[postgres]`. Mantenha uma só fonte de dependências.
+>
+> Critério de pronto do bloco: `ruff check .` limpo e a aplicação importando sem erro.
+
+**Resultado:** reorganização dos módulos em `app/`, configuração única da engine e sessão em `app/db.py`, dependências centralizadas em `pyproject.toml`, e configuração do ambiente documentada em `.env.example` e neste README.
+
+**Aprendizado:** separar a criação da engine da lógica dos serviços torna a sessão compartilhável e testável por dependência.

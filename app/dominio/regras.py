@@ -9,8 +9,6 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from errors import ConflictError
-
 
 def is_overlapping_interval(start_a: datetime, end_a: datetime, start_b: datetime, end_b: datetime) -> bool:
     """Return True when two intervals overlap using the documented open-ended rule."""

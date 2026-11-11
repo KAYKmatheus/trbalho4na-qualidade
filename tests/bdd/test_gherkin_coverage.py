@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from collections import Counter
-from pathlib import Path
 import re
 import unittest
+from collections import Counter
+from pathlib import Path
 
 from tests.bdd.gherkin_steps import read_scenarios
-
 
 ROOT = Path(__file__).resolve().parents[2]
 CASES_FILE = ROOT / "docs" / "qualidade" / "casos-de-teste.md"

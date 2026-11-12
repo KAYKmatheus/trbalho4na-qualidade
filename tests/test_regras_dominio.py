@@ -61,3 +61,20 @@ def test_reservation_status_transition_follows_the_confirmed_lifecycle(current, 
 def test_final_reservation_status_cannot_transition() -> None:
     with pytest.raises(ValidationError):
         transition_reservation_status(StatusReserva.CANCELADA, StatusReserva.PENDENTE)
+
+
+@pytest.mark.parametrize(
+    ("start_a", "end_a", "start_b", "end_b"),
+    [
+        (9, 8, 10, 11),
+        (9, 10, 11, 10),
+    ],
+)
+def test_invalid_interval_is_rejected(start_a, end_a, start_b, end_b) -> None:
+    intervals = [
+        datetime(2026, 1, 10, hour, tzinfo=timezone.utc)
+        for hour in (start_a, end_a, start_b, end_b)
+    ]
+
+    with pytest.raises(ValidationError, match="Intervalos devem ter início antes do fim."):
+        is_overlapping_interval(*intervals)

@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.db import get_db
+from app.erros import ValidationError
 from app.models import AuditEntry, Base, Reservation, ReservationItem, User
 from app.servicos.autenticacao import hash_password
 from app.servicos.reservas import ReservationService
@@ -217,3 +218,92 @@ def test_home_page_renders_reservation_dashboard() -> None:
     text = response.text.lower()
     assert "dashboard" in text or "alocasenac" in text
     assert "api" in text
+
+
+@pytest.mark.parametrize(
+    ("item", "expected_error"),
+    [
+        ({}, "Cada item precisa de tipo de recurso, identificador e intervalo."),
+        ({"resource_type": "sala"}, "Cada item precisa de tipo de recurso, identificador e intervalo."),
+        (
+            {"resource_type": "sala", "resource_id": "room-1", "end": datetime(2026, 1, 1, 10)},
+            "Cada item precisa de tipo de recurso, identificador e intervalo.",
+        ),
+        (
+            {
+                "resource_type": "sala",
+                "resource_id": "room-1",
+                "start": datetime(2026, 1, 1, 9),
+            },
+            "Cada item precisa de tipo de recurso, identificador e intervalo.",
+        ),
+        (
+            {
+                "resource_type": "sala",
+                "resource_id": "room-1",
+                "start": object(),
+                "end": datetime(2026, 1, 1, 10),
+            },
+            "Início e fim devem ser datas válidas.",
+        ),
+        (
+            {
+                "resource_type": "sala",
+                "resource_id": "room-1",
+                "start": datetime(2026, 1, 1, 9),
+                "end": object(),
+            },
+            "Início e fim devem ser datas válidas.",
+        ),
+        (
+            {
+                "resource_type": "sala",
+                "resource_id": "room-1",
+                "start": datetime(2026, 1, 1, 10, tzinfo=timezone.utc),
+                "end": datetime(2026, 1, 1, 10, tzinfo=timezone.utc),
+            },
+            "O intervalo da reserva deve ter início antes do fim.",
+        ),
+        (
+            {
+                "resource_type": "material",
+                "resource_id": "material-1",
+                "start": datetime(2026, 1, 1, 9),
+                "end": datetime(2026, 1, 1, 10),
+                "quantity": "não é número",
+            },
+            "A quantidade deve ser um número inteiro maior que zero.",
+        ),
+        (
+            {
+                "resource_type": "material",
+                "resource_id": "material-1",
+                "start": datetime(2026, 1, 1, 9),
+                "end": datetime(2026, 1, 1, 10),
+                "quantity": 0,
+            },
+            "A quantidade deve ser maior que zero.",
+        ),
+    ],
+)
+def test_reservation_item_parser_rejects_invalid_input(item: dict, expected_error: str) -> None:
+    with pytest.raises(ValidationError, match=expected_error):
+        ReservationService._parse_item(item)
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [
+        (datetime(2026, 1, 1, 9), datetime(2026, 1, 1, 10)),
+        ("2026-01-01T09:00:00Z", "2026-01-01T10:00:00Z"),
+    ],
+)
+def test_reservation_item_parser_accepts_and_normalizes_datetimes(start, end) -> None:
+    parsed = ReservationService._parse_item(
+        {"resource_type": "sala", "resource_id": "room-1", "start": start, "end": end}
+    )
+
+    assert parsed[:2] == ("sala", "room-1")
+    assert parsed[2].tzinfo == timezone.utc
+    assert parsed[3].tzinfo == timezone.utc
+    assert parsed[4] == 1

@@ -96,6 +96,9 @@ SEM_CENARIO = {
     "tests/test_regras_dominio.py::test_final_reservation_status_cannot_transition": (
         "Teste unitário de estado final."
     ),
+    "tests/test_regras_dominio.py::test_invalid_interval_is_rejected": (
+        "Teste unitário da validação de intervalos inválidos."
+    ),
     "tests/test_reservas.py::test_home_page_renders_reservation_dashboard": (
         "Teste de renderização da página inicial."
     ),

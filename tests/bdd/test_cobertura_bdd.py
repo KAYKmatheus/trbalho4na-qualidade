@@ -60,6 +60,9 @@ SEM_CENARIO = {
     "tests/bdd/test_delivery_config.py::test_ci_runs_quality_gates_for_pull_requests_and_principal": (
         "Teste de configuração do CI."
     ),
+    "tests/bdd/test_delivery_config.py::test_compose_app_waits_for_healthy_postgres_and_docker_context_is_filtered": (
+        "Verifica a infraestrutura Docker sem cenário Gherkin próprio."
+    ),
     "tests/bdd/test_delivery_config.py::test_sonar_properties_do_not_embed_a_token": (
         "Teste de configuração do Sonar."
     ),

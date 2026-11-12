@@ -5,26 +5,37 @@
   background: #f8fafc;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   min-width: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .container {
-  width: min(100% - 2rem, 64rem);
+  width: 100%;
+  max-width: 66rem;
   margin-inline: auto;
-  padding-block: 1.5rem;
+  padding: 1.5rem 1rem;
 }
 
 .panel,
-.reservation-card,
 .resource-card {
   display: grid;
   gap: 0.75rem;
+  min-width: 0;
   padding: 1rem;
   border: 1px solid #cbd5e1;
   border-radius: 0.75rem;
   background: #fff;
+}
+
+.resource-card {
+  margin-block: 1rem;
 }
 
 .site-header {
@@ -32,9 +43,17 @@ body {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem max(1rem, calc((100% - 64rem) / 2));
+  padding: 1rem max(1rem, calc((100% - 66rem) / 2));
   background: #0c2d57;
   color: #fff;
+}
+
+.brand {
+  align-self: center;
+  color: #fff;
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .site-header nav {
@@ -44,8 +63,24 @@ body {
   gap: 0.5rem;
 }
 
-.site-header a {
+.site-header nav a,
+.site-header nav button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.35rem;
+}
+
+.site-header nav a {
   color: #fff;
+}
+
+.site-header nav a[aria-current="page"] {
+  background: #1e4774;
+  text-decoration-thickness: 0.15em;
+  text-underline-offset: 0.2em;
 }
 
 input,
@@ -55,15 +90,48 @@ button {
   font: inherit;
 }
 
-button,
 input,
 select,
 textarea {
+  width: 100%;
+  max-width: 100%;
   min-height: 2.75rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #64748b;
+  border-radius: 0.35rem;
+  color: #172554;
+  background: #fff;
+}
+
+textarea {
+  resize: vertical;
 }
 
 button {
+  width: auto;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid #075985;
+  border-radius: 0.35rem;
+  color: #fff;
+  background: #075985;
   cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #0c2d57;
+}
+
+button:disabled {
+  border-color: #64748b;
+  color: #334155;
+  background: #e2e8f0;
+  cursor: not-allowed;
+}
+
+label {
+  font-weight: 650;
 }
 
 :focus-visible {
@@ -72,16 +140,25 @@ button {
 }
 
 .message {
+  max-width: 100%;
+  padding: 0.5rem 0;
   color: #7f1d1d;
 }
 
+.resource-card h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
 .table-wrap {
-  overflow-x: auto;
+  width: 100%;
+  min-width: 0;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 th,
@@ -89,4 +166,93 @@ td {
   padding: 0.75rem;
   border-bottom: 1px solid #cbd5e1;
   text-align: left;
+  overflow-wrap: anywhere;
+}
+
+th {
+  background: #e2e8f0;
+}
+
+@media (max-width: 768px) {
+  .site-header {
+    align-items: flex-start;
+  }
+
+  .site-header nav {
+    flex: 1 1 100%;
+  }
+
+  #reservations-table,
+  #reservations-table tbody,
+  #reservations-table tr,
+  #reservations-table td {
+    display: block;
+    width: 100%;
+  }
+
+  #reservations-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
+  #reservations-table tbody {
+    display: grid;
+    gap: 1rem;
+  }
+
+  #reservations-table tr.reservation-card {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.65rem;
+    background: #fff;
+  }
+
+  #reservations-table td {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 0.35fr) minmax(0, 1fr);
+    gap: 0.5rem;
+    padding: 0.45rem 0;
+    border: 0;
+  }
+
+  #reservations-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .site-header {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .site-header nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .site-header nav a,
+  .site-header nav button {
+    width: 100%;
+    text-align: center;
+  }
+
+  #reservations-table td {
+    grid-template-columns: minmax(5.5rem, 0.4fr) minmax(0, 1fr);
+  }
 }

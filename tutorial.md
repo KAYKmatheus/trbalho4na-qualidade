@@ -170,3 +170,40 @@ ambiental.
 - O [checklist do CT-34](./docs/qualidade/evidencias/ct-34-checklist.md) segue
   aguardando preenchimento manual. A cobertura da suíte registrada não aprova
   esse caso.
+
+## Ciclo TDD aplicado
+
+O handler global de erros inesperados foi implementado em duas etapas
+verificáveis:
+
+1. **Vermelho — teste primeiro.** O commit
+   `7a2b651f597a4efdefeafe0f31699394ea92c4b3` adicionou um endpoint temporário
+   que levanta `RuntimeError("segredo-interno")`.
+   A execução falhou no contrato do tipo de conteúdo:
+
+   ```text
+   assert response.headers["content-type"].startswith("application/json")
+   E AssertionError: assert False
+   E ... = 'text/plain; charset=utf-8'.startswith
+   1 failed
+   ```
+
+   A saída completa está em
+   [tdd-handler-vermelho.txt](./docs/qualidade/evidencias/tdd-handler-vermelho.txt).
+
+2. **Verde — implementação mínima.** O commit
+   `f30349be6b99920e8842fa44338678797860cf1d` registrou em `app/main.py` um
+   handler para exceções inesperadas. Ele grava
+   a exceção e o traceback no log e responde somente com
+   `{"detail": "Erro interno do servidor."}`. A verificação observada foi:
+
+   ```text
+   tests/test_global_errors.py . [100%]
+   1 passed
+   ```
+
+   A saída completa está em
+   [tdd-handler-verde.txt](./docs/qualidade/evidencias/tdd-handler-verde.txt).
+
+3. **Refatoração.** Não foi necessária: o handler ficou em um único ponto e
+   não houve duplicação a extrair.

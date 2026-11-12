@@ -57,6 +57,13 @@ horário.
   python -m tests.bdd.gerar_relatorio
   ```
 
+- **Interface web:** depois de iniciar a aplicação, abra
+  [http://localhost:8000/app/index.html](http://localhost:8000/app/index.html).
+  As telas de busca, criação e gerenciamento das próprias reservas ficam
+  disponíveis em `/app/buscar.html`, `/app/reservar.html` e `/app/minhas.html`.
+  A validação visual e por teclado do CT-34 ainda depende do checklist manual
+  em [ct-34-checklist.md](./docs/qualidade/evidencias/ct-34-checklist.md).
+
 - O plano de carga JMeter e os passos para executá-lo estão em
   [desempenho](./docs/qualidade/desempenho.md). A execução ainda depende de
   PostgreSQL com dados de teste locais.

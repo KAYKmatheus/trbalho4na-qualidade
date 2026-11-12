@@ -1,6 +1,6 @@
 # CT-34 — checklist manual de interface
 
-**Status:** Parcial, aguardando execução manual. Não registrar como aprovado até
+**Status:** Pendente de execução manual. Não registrar como aprovado até
 preencher este checklist e salvar as capturas na pasta de evidências.
 
 ## Dados da execução
@@ -13,25 +13,36 @@ preencher este checklist e salvar as capturas na pasta de evidências.
 
 ## Preparação
 
-1. Inicie a aplicação local e abra as ferramentas de desenvolvedor do navegador.
-2. Ative a barra de ferramentas de dispositivos responsivos.
-3. Use as larguras exatas de 360 px, 768 px e 1920 px, mantendo o zoom em 100%.
-4. Em cada largura, verifique `/` e `/docs`; registre o resultado e salve uma
-   captura de tela identificada por rota e largura.
-5. Em cada rota e largura, percorra os controles usando apenas `Tab` e
-   `Shift+Tab`. Confirme que o foco visível acompanha a navegação e que todos
-   os links/controles alcançáveis podem ser ativados pelo teclado.
+1. Inicie a aplicação com `uvicorn app.main:app --reload` ou `docker compose up --build`.
+2. Abra cada rota abaixo no navegador, com zoom em 100%.
+3. Repita a verificação nas larguras exatas de 360 px, 768 px, 1280 px e 1920 px.
+4. Em cada rota e largura, confirme que não há rolagem horizontal e que o
+   conteúdo e os controles permanecem visíveis.
+5. Percorra a página somente com `Tab` e `Shift+Tab`. Confirme que o foco está
+   sempre visível e que todos os links e controles alcançáveis podem ser usados.
+6. Preencha o resultado e salve uma captura por rota e largura, identificada
+   como `tela-largura.png`.
 
 ## Resultados por rota e largura
 
 | Rota | Largura | Sem rolagem horizontal? | Foco visível e navegação por teclado? | Resultado / observações | Captura |
 |---|---:|---|---|---|---|
-| `/` | 360 px | ______ | ______ | ____________________ | ____________________ |
-| `/` | 768 px | ______ | ______ | ____________________ | ____________________ |
-| `/` | 1920 px | ______ | ______ | ____________________ | ____________________ |
-| `/docs` | 360 px | ______ | ______ | ____________________ | ____________________ |
-| `/docs` | 768 px | ______ | ______ | ____________________ | ____________________ |
-| `/docs` | 1920 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/index.html` | 360 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/index.html` | 768 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/index.html` | 1280 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/index.html` | 1920 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/buscar.html` | 360 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/buscar.html` | 768 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/buscar.html` | 1280 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/buscar.html` | 1920 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/reservar.html` | 360 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/reservar.html` | 768 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/reservar.html` | 1280 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/reservar.html` | 1920 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/minhas.html` | 360 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/minhas.html` | 768 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/minhas.html` | 1280 px | ______ | ______ | ____________________ | ____________________ |
+| `/app/minhas.html` | 1920 px | ______ | ______ | ____________________ | ____________________ |
 
 ## Conclusão
 

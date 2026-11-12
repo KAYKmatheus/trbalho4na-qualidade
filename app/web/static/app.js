@@ -52,6 +52,43 @@ function logout() {
   window.location.assign("/app/index.html");
 }
 
+function showMessage(element, message) {
+  element.textContent = message;
+  element.hidden = false;
+}
+
+const loginForm = document.querySelector("#login-form");
+if (loginForm) {
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const message = document.querySelector("#login-error");
+    message.hidden = true;
+
+    try {
+      const formData = new FormData(loginForm);
+      const result = await apiRequest("/v1/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email: formData.get("email"),
+          password: formData.get("password"),
+        }),
+      });
+
+      try {
+        sessionStorage.setItem(AUTH_TOKEN_KEY, result.access_token);
+      } catch (error) {
+        console.error("Não foi possível guardar a sessão no navegador.", error);
+        throw new Error("O navegador não permitiu guardar a sessão. Verifique as configurações e tente novamente.");
+      }
+
+      window.location.assign("/app/buscar.html");
+    } catch (error) {
+      const messageText = error.status === 401 ? "E-mail ou senha inválidos." : error.message;
+      showMessage(message, messageText || "Não foi possível entrar. Tente novamente.");
+    }
+  });
+}
+
 document.querySelectorAll("[data-logout]").forEach((button) => {
   button.addEventListener("click", logout);
 });

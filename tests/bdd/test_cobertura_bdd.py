@@ -126,6 +126,9 @@ SEM_CENARIO = {
     "tests/e2e/test_fluxo_completo.py::test_overlapping_room_reservation_is_rejected_over_http": (
         "Conflito ponta a ponta sem cenário Gherkin próprio."
     ),
+    "tests/bdd/test_api_errors.py::test_nonexistent_resource_routes_return_not_found": (
+        "Teste parametrizado de rotas administrativas com recurso inexistente."
+    ),
 }
 
 SCENARIO_PATTERN = re.compile(r"^\s*Cenário(?:\s+de\s+fundo)?:\s*(.+)$")

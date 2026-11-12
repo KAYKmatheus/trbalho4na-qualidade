@@ -149,6 +149,28 @@ def test_ct18_material_over_stock_returns_http_409(auth_client) -> None:
     assert "estoque" in second.json()["detail"].lower()
 
 
+@pytest.mark.parametrize(
+    ("method", "path", "payload"),
+    [
+        pytest.param("GET", "/v1/admin/resources/missing", None, id="consulta-recurso-inexistente"),
+        pytest.param(
+            "PATCH",
+            "/v1/admin/resources/missing",
+            {"name": "Atualização"},
+            id="alteracao-recurso-inexistente",
+        ),
+    ],
+)
+def test_nonexistent_resource_routes_return_not_found(auth_client, method, path, payload) -> None:
+    client, _ = auth_client
+    admin = _token(client, "admin@example.test", "correct-password")
+
+    response = client.request(method, path, headers=admin, json=payload)
+
+    assert response.status_code == 404
+    assert "não encontrado" in response.json()["detail"].lower()
+
+
 def test_ct33_http_errors_use_details_and_never_look_successful(auth_client) -> None:
     client, _ = auth_client
     requester = _token(client, "requester@example.test", "requester-password")

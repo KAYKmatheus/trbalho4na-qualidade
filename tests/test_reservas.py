@@ -266,6 +266,15 @@ def test_home_page_renders_reservation_dashboard() -> None:
         ),
         (
             {
+                "resource_type": "sala",
+                "resource_id": "room-1",
+                "start": datetime(2026, 1, 1, 11, tzinfo=timezone.utc),
+                "end": datetime(2026, 1, 1, 10, tzinfo=timezone.utc),
+            },
+            "O intervalo da reserva deve ter início antes do fim.",
+        ),
+        (
+            {
                 "resource_type": "material",
                 "resource_id": "material-1",
                 "start": datetime(2026, 1, 1, 9),
@@ -285,6 +294,18 @@ def test_home_page_renders_reservation_dashboard() -> None:
             "A quantidade deve ser maior que zero.",
         ),
     ],
+    ids=[
+        "item-vazio",
+        "tipo-sem-demais-campos",
+        "inicio-ausente",
+        "fim-ausente",
+        "inicio-nao-data",
+        "fim-nao-data",
+        "duracao-zero",
+        "inicio-apos-fim",
+        "quantidade-nao-numerica",
+        "quantidade-zero",
+    ],
 )
 def test_reservation_item_parser_rejects_invalid_input(item: dict, expected_error: str) -> None:
     with pytest.raises(ValidationError, match=expected_error):
@@ -297,6 +318,7 @@ def test_reservation_item_parser_rejects_invalid_input(item: dict, expected_erro
         (datetime(2026, 1, 1, 9), datetime(2026, 1, 1, 10)),
         ("2026-01-01T09:00:00Z", "2026-01-01T10:00:00Z"),
     ],
+    ids=["datetime-sem-fuso", "iso8601-utc"],
 )
 def test_reservation_item_parser_accepts_and_normalizes_datetimes(start, end) -> None:
     parsed = ReservationService._parse_item(

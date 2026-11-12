@@ -208,18 +208,6 @@ def test_api_v1_responds_to_creation_endpoint(db_session, monkeypatch: pytest.Mo
     assert payload["items"][0]["resource_type"] == "sala"
 
 
-def test_home_page_renders_reservation_dashboard() -> None:
-    """Verifica FR-14, FR-15, NFR-06, CT-33 e CT-35."""
-    from app.api.v1 import app
-
-    response = TestClient(app).get("/")
-
-    assert response.status_code == 200
-    text = response.text.lower()
-    assert "dashboard" in text or "alocasenac" in text
-    assert "api" in text
-
-
 @pytest.mark.parametrize(
     ("item", "expected_error"),
     [

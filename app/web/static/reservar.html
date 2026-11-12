@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nova reserva — AlocaSenac</title>
+  <link rel="stylesheet" href="/app/estilo.css">
+  <script src="/app/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/app/buscar.html">AlocaSenac</a>
+    <nav aria-label="Navegação principal">
+      <a href="/app/buscar.html">Buscar recursos</a>
+      <a href="/app/reservar.html" aria-current="page">Nova reserva</a>
+      <a href="/app/minhas.html">Minhas reservas</a>
+      <button type="button" data-logout>Sair</button>
+    </nav>
+  </header>
+  <main class="container">
+    <h1>Nova reserva</h1>
+    <form id="reservation-form" class="panel">
+      <label for="resource">Recurso</label>
+      <select id="resource" name="resource_id" required>
+        <option value="">Selecione um recurso na busca</option>
+      </select>
+      <label for="start">Início</label>
+      <input id="start" name="start" type="datetime-local" required>
+      <label for="end">Fim</label>
+      <input id="end" name="end" type="datetime-local" required>
+      <label for="reason">Finalidade</label>
+      <textarea id="reason" name="reason" rows="4" required></textarea>
+      <p id="reservation-message" class="message" role="status" aria-live="polite"></p>
+      <button type="submit">Enviar solicitação</button>
+    </form>
+  </main>
+</body>
+</html>

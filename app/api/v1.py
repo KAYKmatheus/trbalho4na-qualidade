@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import Response
 from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy.orm import Session
 
@@ -51,45 +51,6 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="AlocaSenac API", version="0.1.0", lifespan=lifespan)
-
-
-@app.get("/")
-def home_page() -> HTMLResponse:
-    """Return a simple dashboard page for the reservation backbone."""
-    html = """
-    <html>
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>AlocaSenac Dashboard</title>
-        <style>
-          * { box-sizing: border-box; }
-          body { margin: 0; min-width: 0; font-family: Arial, sans-serif; overflow-x: hidden; }
-          main { width: 100%; max-width: 920px; margin: 0 auto; padding: 2rem 1rem; }
-          nav { display: flex; flex-wrap: wrap; gap: 1rem; }
-          nav a { color: #075985; }
-          nav a:focus-visible { outline: 3px solid #b45309; outline-offset: 3px; }
-          ul { padding-left: 1.2rem; overflow-wrap: anywhere; }
-        </style>
-      </head>
-      <body>
-        <main>
-          <h1>AlocaSenac Dashboard</h1>
-          <p>API de reservas acadêmicas com controle de conflitos e auditoria.</p>
-          <nav aria-label="Navegação principal">
-            <a href="/docs">Documentação da API</a>
-            <a href="/v1/health">Status do serviço</a>
-          </nav>
-          <ul>
-            <li>Reservas</li>
-            <li>Recursos</li>
-            <li>API /v1</li>
-          </ul>
-        </main>
-      </body>
-    </html>
-    """
-    return HTMLResponse(content=html)
 
 
 @app.get("/v1/health")

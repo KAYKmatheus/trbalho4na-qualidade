@@ -99,9 +99,6 @@ SEM_CENARIO = {
     "tests/test_regras_dominio.py::test_invalid_interval_is_rejected": (
         "Teste unitário da validação de intervalos inválidos."
     ),
-    "tests/test_reservas.py::test_home_page_renders_reservation_dashboard": (
-        "Teste de renderização da página inicial."
-    ),
     "tests/test_reservation_em_uso.py::test_cannot_cancel_reservation_in_use_over_http": (
         "Teste de transição HTTP de EM_USO para cancelamento, sem cenário Gherkin próprio."
     ),
@@ -131,6 +128,12 @@ SEM_CENARIO = {
     ),
     "tests/test_reservation_listing.py::test_requester_lists_only_their_own_reservations_over_http": (
         "Teste de isolamento da listagem de reservas do solicitante."
+    ),
+    "tests/bdd/test_web_static.py::test_static_pages_are_served_with_html_and_health_remains_available": (
+        "Verifica a entrega das páginas web estáticas e a saúde da API."
+    ),
+    "tests/bdd/test_web_static.py::test_root_redirects_to_static_login_page": (
+        "Verifica o redirecionamento da raiz para a interface web."
     ),
 }
 

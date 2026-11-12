@@ -1,0 +1,92 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  color: #172554;
+  background: #f8fafc;
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+}
+
+.container {
+  width: min(100% - 2rem, 64rem);
+  margin-inline: auto;
+  padding-block: 1.5rem;
+}
+
+.panel,
+.reservation-card,
+.resource-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem max(1rem, calc((100% - 64rem) / 2));
+  background: #0c2d57;
+  color: #fff;
+}
+
+.site-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.site-header a {
+  color: #fff;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  min-height: 2.75rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid #b45309;
+  outline-offset: 3px;
+}
+
+.message {
+  color: #7f1d1d;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #cbd5e1;
+  text-align: left;
+}

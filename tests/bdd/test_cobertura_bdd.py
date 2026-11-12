@@ -120,6 +120,12 @@ SEM_CENARIO = {
     ): (
         "Teste de contrato do handler global para erros inesperados."
     ),
+    "tests/e2e/test_fluxo_completo.py::test_full_reservation_flow_uses_http_only": (
+        "Fluxo ponta a ponta sem cenário Gherkin próprio."
+    ),
+    "tests/e2e/test_fluxo_completo.py::test_overlapping_room_reservation_is_rejected_over_http": (
+        "Conflito ponta a ponta sem cenário Gherkin próprio."
+    ),
 }
 
 SCENARIO_PATTERN = re.compile(r"^\s*Cenário(?:\s+de\s+fundo)?:\s*(.+)$")

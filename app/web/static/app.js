@@ -38,7 +38,12 @@ async function apiRequest(path, options = {}) {
   const payload = contentType.includes("application/json") ? await response.json() : null;
   if (!response.ok) {
     const detail = payload && payload.detail;
-    throw new ApiError(response.status, typeof detail === "string" ? detail : "Não foi possível concluir a solicitação.");
+    const message = typeof detail === "string"
+      ? detail
+      : Array.isArray(detail)
+        ? detail.map((item) => item.msg).filter(Boolean).join(" ")
+        : "Não foi possível concluir a solicitação.";
+    throw new ApiError(response.status, message);
   }
   return payload;
 }
@@ -73,15 +78,14 @@ function userFacingError(error) {
 async function ensureAuthenticated() {
   if (!getAuthToken()) {
     window.location.assign("/app/index.html");
-    return false;
+    return null;
   }
   try {
-    await apiRequest("/v1/auth/me");
-    return true;
+    return await apiRequest("/v1/auth/me");
   } catch (error) {
     if (error.status === 401) {
       logout();
-      return false;
+      return null;
     }
     throw error;
   }
@@ -189,6 +193,86 @@ if (searchForm) {
       showMessage(searchMessage, `${resources.length} recurso(s) disponível(is).`);
     } catch (error) {
       showMessage(searchMessage, userFacingError(error));
+    }
+  });
+}
+
+const reservationForm = document.querySelector("#reservation-form");
+if (reservationForm) {
+  const reservationMessage = document.querySelector("#reservation-message");
+  const resourceSelect = document.querySelector("#resource");
+  const startInput = document.querySelector("#start");
+  const endInput = document.querySelector("#end");
+  let selectedResource = null;
+  let requesterId = null;
+  const toLocalInputValue = (value) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+    return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  };
+
+  try {
+    selectedResource = JSON.parse(sessionStorage.getItem("alocasenac_selected_resource") || "null");
+    const selectedStart = sessionStorage.getItem("alocasenac_selected_start");
+    const selectedEnd = sessionStorage.getItem("alocasenac_selected_end");
+    if (selectedResource && selectedResource.id && selectedResource.resource_type) {
+      const option = document.createElement("option");
+      option.value = selectedResource.id;
+      option.textContent = `${selectedResource.resource_type} — ${selectedResource.name}`;
+      option.selected = true;
+      resourceSelect.append(option);
+      startInput.value = toLocalInputValue(selectedStart);
+      endInput.value = toLocalInputValue(selectedEnd);
+    } else {
+      showMessage(reservationMessage, "Escolha um recurso na busca antes de enviar uma reserva.");
+    }
+  } catch (error) {
+    console.error("Não foi possível ler a seleção guardada.", error);
+    showMessage(reservationMessage, "A seleção não está disponível. Volte à busca e escolha um recurso.");
+  }
+
+  const authenticationCheck = ensureAuthenticated()
+    .then((user) => {
+      requesterId = user ? user.id : null;
+    })
+    .catch((error) => showMessage(reservationMessage, userFacingError(error)));
+  reservationForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    reservationMessage.hidden = true;
+    const formData = new FormData(reservationForm);
+    const start = new Date(String(formData.get("start")));
+    const end = new Date(String(formData.get("end")));
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start >= end) {
+      showMessage(reservationMessage, "Informe um período válido, com início anterior ao fim.");
+      return;
+    }
+
+    try {
+      await authenticationCheck;
+      if (!requesterId || !selectedResource) {
+        throw new ApiError(401, "Entre novamente e escolha um recurso antes de enviar a reserva.");
+      }
+      const reservation = await apiRequest("/v1/reservations", {
+        method: "POST",
+        body: JSON.stringify({
+          solicitante_id: requesterId,
+          reason: formData.get("reason"),
+          items: [
+            {
+              resource_type: selectedResource.resource_type,
+              resource_id: formData.get("resource_id"),
+              start: start.toISOString(),
+              end: end.toISOString(),
+              quantity: Number(formData.get("quantity")),
+            },
+          ],
+        }),
+      });
+      showMessage(reservationMessage, `Solicitação enviada. Estado: ${reservation.status}.`);
+    } catch (error) {
+      showMessage(reservationMessage, userFacingError(error));
     }
   });
 }

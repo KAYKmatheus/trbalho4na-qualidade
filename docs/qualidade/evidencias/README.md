@@ -46,6 +46,8 @@ Em 2026-11-12, `DATABASE_URL` não estava definida e o Docker CLI não estava
 instalado neste ambiente. Os testes PostgreSQL e as respectivas evidências
 seguem pendentes de execução; nenhum resultado foi simulado.
 
+CI: aguardando execução no Pull Request.
+
 Registro:
 
 | Evidência | CT | Data | Executor | Resultado |

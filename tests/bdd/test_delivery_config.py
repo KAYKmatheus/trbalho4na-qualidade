@@ -28,6 +28,11 @@ def test_ci_runs_quality_gates_for_pull_requests_and_principal() -> None:
     assert "covered_branches" in workflow
     assert "covered_lines" in workflow
     assert "num_statements" in workflow
+    integration_job = workflow.split("\n  integration:\n", 1)[1]
+    assert "image: postgres:16" in integration_job
+    assert "DATABASE_URL:" in integration_job
+    assert "AUTH_SECRET_KEY:" in integration_job
+    assert 'python -m pytest -o addopts="" -m integration' in integration_job
     assert "SONAR_TOKEN" in workflow
     assert "-Dsonar.coverage.exclusions=tests/**" in workflow
     assert "sonar.qualitygate.wait=true" in workflow

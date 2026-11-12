@@ -102,6 +102,24 @@ SEM_CENARIO = {
     "tests/test_reservas.py::test_home_page_renders_reservation_dashboard": (
         "Teste de renderização da página inicial."
     ),
+    "tests/test_reservation_em_uso.py::test_cannot_cancel_reservation_in_use_over_http": (
+        "Teste de transição HTTP de EM_USO para cancelamento, sem cenário Gherkin próprio."
+    ),
+    (
+        "tests/test_reservation_em_uso.py::"
+        "test_in_use_reservation_rejects_all_transitions_except_completion_over_http"
+    ): (
+        "Teste parametrizado das transições proibidas a partir de EM_USO."
+    ),
+    "tests/test_reservation_em_uso.py::test_in_use_reservation_can_be_completed_over_http": (
+        "Teste de conclusão HTTP de uma reserva EM_USO."
+    ),
+    (
+        "tests/test_global_errors.py::"
+        "test_unexpected_error_returns_generic_json_without_internal_details"
+    ): (
+        "Teste de contrato do handler global para erros inesperados."
+    ),
 }
 
 SCENARIO_PATTERN = re.compile(r"^\s*Cenário(?:\s+de\s+fundo)?:\s*(.+)$")

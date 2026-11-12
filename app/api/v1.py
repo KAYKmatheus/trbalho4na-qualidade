@@ -458,6 +458,8 @@ def transition_reservation_status(
             target_status=payload.status.value,
             actor_id=user.id,
         )
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if reservation is None:

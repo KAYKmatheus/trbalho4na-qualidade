@@ -409,26 +409,29 @@ class ReservationService:
         target_status: str,
         actor_id: str,
     ) -> Reservation | None:
-        with self.session.begin():
-            reservation = self.session.scalar(
-                select(Reservation).where(Reservation.id == reservation_id).with_for_update()
-            )
-            if reservation is None:
-                return None
-            before_status = reservation.status
-            next_status = transition_reservation_status(before_status, target_status)
-            reservation.status = next_status.value
-            for item in reservation.items:
-                if item.status == before_status:
-                    item.status = next_status.value
-            self._record_audit(
-                entity_type="reservation",
-                entity_id=reservation.id,
-                action="STATUS_TRANSITION",
-                payload={"status": next_status.value},
-                actor_id=actor_id,
-                before_value=json.dumps({"status": before_status}, sort_keys=True),
-                after_value=json.dumps({"status": next_status.value}, sort_keys=True),
-            )
-            self.session.flush()
-            return reservation
+        try:
+            with self.session.begin():
+                reservation = self.session.scalar(
+                    select(Reservation).where(Reservation.id == reservation_id).with_for_update()
+                )
+                if reservation is None:
+                    return None
+                before_status = reservation.status
+                next_status = transition_reservation_status(before_status, target_status)
+                reservation.status = next_status.value
+                for item in reservation.items:
+                    if item.status == before_status:
+                        item.status = next_status.value
+                self._record_audit(
+                    entity_type="reservation",
+                    entity_id=reservation.id,
+                    action="STATUS_TRANSITION",
+                    payload={"status": next_status.value},
+                    actor_id=actor_id,
+                    before_value=json.dumps({"status": before_status}, sort_keys=True),
+                    after_value=json.dumps({"status": next_status.value}, sort_keys=True),
+                )
+                self.session.flush()
+                return reservation
+        except ValidationError as exc:
+            raise ConflictError(str(exc)) from exc

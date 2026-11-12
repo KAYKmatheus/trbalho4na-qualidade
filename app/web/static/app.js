@@ -277,6 +277,96 @@ if (reservationForm) {
   });
 }
 
+const reservationsList = document.querySelector("#reservations-list");
+if (reservationsList) {
+  const reservationsMessage = document.querySelector("#reservations-message");
+  const cancellableStatuses = new Set(["SOLICITADA", "PENDENTE", "APROVADA", "CONFIRMADA"]);
+  const formatDateTime = (value) => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+      ? value
+      : new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(date);
+  };
+
+  const renderReservations = (reservations) => {
+    reservationsList.replaceChildren();
+    if (reservations.length === 0) {
+      showMessage(reservationsMessage, "Você ainda não possui reservas.");
+      return;
+    }
+
+    for (const reservation of reservations) {
+      const row = document.createElement("tr");
+      row.className = "reservation-card";
+      const period = reservation.items
+        .map((item) => `${formatDateTime(item.start)} – ${formatDateTime(item.end)}`)
+        .join("; ");
+      const resources = reservation.items
+        .map((item) => `${item.resource_type}: ${item.resource_id}`)
+        .join("; ");
+      const values = [
+        ["Estado", reservation.status],
+        ["Período", period],
+        ["Recursos", resources],
+      ];
+      for (const [label, value] of values) {
+        const cell = document.createElement("td");
+        cell.dataset.label = label;
+        cell.textContent = value;
+        row.append(cell);
+      }
+
+      const actions = document.createElement("td");
+      actions.dataset.label = "Ações";
+      const cancelButton = document.createElement("button");
+      cancelButton.type = "button";
+      cancelButton.textContent = "Cancelar";
+      cancelButton.disabled = !cancellableStatuses.has(reservation.status);
+      if (cancelButton.disabled) {
+        cancelButton.title = `Cancelamento indisponível no estado ${reservation.status}.`;
+      }
+      cancelButton.addEventListener("click", async () => {
+        if (!window.confirm("Confirma o cancelamento desta reserva?")) {
+          return;
+        }
+        cancelButton.disabled = true;
+        try {
+          const cancelled = await apiRequest(`/v1/reservations/${encodeURIComponent(reservation.id)}`, {
+            method: "DELETE",
+          });
+          showMessage(reservationsMessage, `Reserva cancelada. Estado: ${cancelled.status}.`);
+          await loadReservations();
+        } catch (error) {
+          cancelButton.disabled = false;
+          showMessage(reservationsMessage, userFacingError(error));
+        }
+      });
+      actions.append(cancelButton);
+      row.append(actions);
+      reservationsList.append(row);
+    }
+    reservationsMessage.hidden = true;
+  };
+
+  async function loadReservations() {
+    try {
+      const reservations = await apiRequest("/v1/reservations");
+      renderReservations(reservations);
+    } catch (error) {
+      showMessage(reservationsMessage, userFacingError(error));
+    }
+  }
+
+  ensureAuthenticated()
+    .then((user) => {
+      if (user) {
+        return loadReservations();
+      }
+      return undefined;
+    })
+    .catch((error) => showMessage(reservationsMessage, userFacingError(error)));
+}
+
 document.querySelectorAll("[data-logout]").forEach((button) => {
   button.addEventListener("click", logout);
 });

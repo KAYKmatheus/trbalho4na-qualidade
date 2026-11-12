@@ -57,6 +57,36 @@ function showMessage(element, message) {
   element.hidden = false;
 }
 
+function userFacingError(error) {
+  if (error.status === 403) {
+    return `Você não tem permissão para realizar esta ação. ${error.message}`;
+  }
+  if (error.status === 409) {
+    return `Conflito: ${error.message}`;
+  }
+  if (error.status === 422) {
+    return `Verifique os dados informados. ${error.message}`;
+  }
+  return error.message || "Não foi possível concluir a solicitação. Tente novamente.";
+}
+
+async function ensureAuthenticated() {
+  if (!getAuthToken()) {
+    window.location.assign("/app/index.html");
+    return false;
+  }
+  try {
+    await apiRequest("/v1/auth/me");
+    return true;
+  } catch (error) {
+    if (error.status === 401) {
+      logout();
+      return false;
+    }
+    throw error;
+  }
+}
+
 const loginForm = document.querySelector("#login-form");
 if (loginForm) {
   loginForm.addEventListener("submit", async (event) => {
@@ -85,6 +115,80 @@ if (loginForm) {
     } catch (error) {
       const messageText = error.status === 401 ? "E-mail ou senha inválidos." : error.message;
       showMessage(message, messageText || "Não foi possível entrar. Tente novamente.");
+    }
+  });
+}
+
+const searchForm = document.querySelector("#search-form");
+if (searchForm) {
+  const searchMessage = document.querySelector("#search-message");
+  const searchResults = document.querySelector("#search-results");
+  ensureAuthenticated().catch((error) => showMessage(searchMessage, userFacingError(error)));
+
+  searchForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    searchMessage.hidden = true;
+    searchResults.replaceChildren();
+
+    const formData = new FormData(searchForm);
+    const start = new Date(String(formData.get("start")));
+    const end = new Date(String(formData.get("end")));
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start >= end) {
+      showMessage(searchMessage, "Informe um período válido, com início anterior ao fim.");
+      return;
+    }
+
+    const params = new URLSearchParams({
+      start: start.toISOString(),
+      end: end.toISOString(),
+    });
+    const resourceType = String(formData.get("resource_type") || "");
+    const capacity = String(formData.get("capacity") || "");
+    if (resourceType) {
+      params.set("resource_type", resourceType);
+    }
+    if (capacity) {
+      params.set("capacity", capacity);
+    }
+
+    try {
+      const resources = await apiRequest(`/v1/resources/search?${params.toString()}`);
+      if (resources.length === 0) {
+        showMessage(searchMessage, "Nenhum recurso disponível para os filtros informados.");
+        return;
+      }
+
+      for (const resource of resources) {
+        const card = document.createElement("article");
+        card.className = "resource-card";
+        const heading = document.createElement("h2");
+        heading.textContent = resource.name;
+        const details = document.createElement("p");
+        const capacityText = resource.capacity ? `${resource.capacity} lugares` : "Não se aplica";
+        const availability = resource.available_quantity === null || resource.available_quantity === undefined
+          ? "Disponível no período"
+          : `${resource.available_quantity} unidades disponíveis`;
+        details.textContent = `${resource.resource_type} · Capacidade: ${capacityText} · ${availability}`;
+        const reserveButton = document.createElement("button");
+        reserveButton.type = "button";
+        reserveButton.textContent = "Reservar";
+        reserveButton.addEventListener("click", () => {
+          try {
+            sessionStorage.setItem("alocasenac_selected_resource", JSON.stringify(resource));
+            sessionStorage.setItem("alocasenac_selected_start", start.toISOString());
+            sessionStorage.setItem("alocasenac_selected_end", end.toISOString());
+            window.location.assign("/app/reservar.html");
+          } catch (error) {
+            console.error("Não foi possível guardar a seleção no navegador.", error);
+            showMessage(searchMessage, "O navegador não permitiu guardar a seleção. Tente novamente.");
+          }
+        });
+        card.append(heading, details, reserveButton);
+        searchResults.append(card);
+      }
+      showMessage(searchMessage, `${resources.length} recurso(s) disponível(is).`);
+    } catch (error) {
+      showMessage(searchMessage, userFacingError(error));
     }
   });
 }

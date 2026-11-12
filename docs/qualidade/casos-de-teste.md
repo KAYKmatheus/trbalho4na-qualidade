@@ -78,7 +78,7 @@ quando houver evidência correspondente em `docs/qualidade/evidencias/`.
 | CT-31 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-32 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-33 | 2026-11-11 | Local | Parcial — validação/autenticação; demais classes de erro não cobertas integralmente | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
-| CT-34 | 2026-11-11 | Local | Parcial — baseline HTML/CSS; viewport e teclado reais pendentes | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-34 | — | — | Parcial, aguardando execução manual | [checklist manual](./evidencias/ct-34-checklist.md) | — |
 | CT-35 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-36 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-37 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |

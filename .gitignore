@@ -25,6 +25,7 @@ reports/
 tests/desempenho/reservas.csv
 tests/desempenho/*.jtl
 tests/desempenho/relatorio-html/
+tests/desempenho/relatorio-jmeter/
 
 # Build e logs
 dist/

@@ -1,5 +1,7 @@
 # AlocaSenac — Sistema acadêmico de alocação de recursos
 
+[![CI](https://github.com/KAYKmatheus/trbalho4na-qualidade/actions/workflows/ci.yml/badge.svg?branch=principal)](https://github.com/KAYKmatheus/trbalho4na-qualidade/actions/workflows/ci.yml)
+
 Sistema para consultar e alocar salas, professores e materiais sem conflitos de
 horário.
 
@@ -40,8 +42,28 @@ horário.
   com hash PBKDF2 e contas são provisionadas por Administradores em
   `POST /v1/admin/users`.
 - Execute a API com `uvicorn app.main:app --reload`.
+- Para executar a aplicação e o PostgreSQL em contêineres, configure
+  `AUTH_SECRET_KEY` no ambiente (ou em um `.env` local, ignorado pelo Git) e
+  rode `docker compose up --build`. A API fica em `http://localhost:8000` e o
+  banco local de teste em `localhost:5432`.
+- Rode os testes unitários com `python -m pytest`. Para executar também todos
+  os testes de integração/concorrência contra PostgreSQL, use
+  `python -m pytest -o addopts=""`; para somente os testes marcados
+  `integration`, use `python -m pytest -m integration -o addopts=""`.
+- Para gerar a cobertura e o relatório, execute:
+
+  ```powershell
+  python -m pytest -o addopts="" --cov=app --cov-branch --cov-report=json:coverage.json
+  python -m tests.bdd.gerar_relatorio
+  ```
+
 - O plano de carga JMeter e os passos para executá-lo estão em
   [desempenho](./docs/qualidade/desempenho.md). A execução ainda depende de
   PostgreSQL com dados de teste locais.
-- No GitHub, cadastre `SONAR_TOKEN` como Actions secret para habilitar o scan
-  SonarCloud; o workflow pula essa etapa enquanto o segredo não estiver definido.
+- **Configurar o SonarCloud no GitHub:** entre no SonarCloud, abra seu perfil e
+  acesse **My Account → Security → Generate Tokens**. Crie um token de análise
+  e copie-o sem inseri-lo em nenhum arquivo do repositório. No GitHub, abra
+  **Settings → Secrets and variables → Actions → New repository secret**,
+  informe `SONAR_TOKEN` como nome e cole o token como valor. O workflow executa
+  o scan e aguarda o quality gate quando esse segredo estiver disponível; sem
+  ele, o scan é ignorado. Nunca publique nem versione o token.

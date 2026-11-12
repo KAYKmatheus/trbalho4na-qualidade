@@ -1,0 +1,8 @@
+.git
+.aiox-core
+.claude
+tests
+docs
+__pycache__
+.env
+htmlcov

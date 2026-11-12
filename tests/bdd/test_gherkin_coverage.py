@@ -45,6 +45,8 @@ class GherkinCoverageTest(unittest.TestCase):
             location = f"{scenario.feature_file.relative_to(ROOT)}:{scenario.line}"
             if scenario.case_id is None:
                 failures.append(f"{location}: cenário sem '# Equivale a: CT-xx'")
+            if not scenario.test_ids:
+                failures.append(f"{location}: cenário sem '# Teste: tests/...::test_...'")
 
             keywords = {keyword for keyword, _ in scenario.steps}
             missing_keywords = {"Dado", "Quando", "Então"} - keywords

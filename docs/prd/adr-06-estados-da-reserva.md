@@ -16,7 +16,8 @@ que já podem ocupar a disponibilidade, inclusive reservas sem aprovação.
 
 ## Decisão
 
-O grupo decidiu manter `CONFIRMADA`. `PENDENTE` permanece para itens que
-aguardam aprovação. A lista de estados ativos e a restrição de sobreposição
-devem continuar coerentes entre si; materiais são tratados pelo controle de
-estoque, enquanto salas e professores permanecem protegidos pela restrição.
+O grupo confirmou em 2026-11-11 que `CONFIRMADA` deve permanecer. `PENDENTE`
+continua representando itens que aguardam aprovação. A lista de estados ativos
+e a restrição de sobreposição devem continuar coerentes entre si; materiais
+são tratados pelo controle de estoque, enquanto salas e professores
+permanecem protegidos pela restrição.

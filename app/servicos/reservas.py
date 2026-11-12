@@ -231,6 +231,7 @@ class ReservationService:
                     action="CREATE",
                     payload={"solicitante_id": solicitante_id, "reason": reason, "item_count": len(items)},
                     actor_id=solicitante_id,
+                    before_value=json.dumps({"exists": False}, sort_keys=True),
                     after_value=json.dumps({"status": reservation.status}, sort_keys=True),
                 )
                 NotificationService.record(

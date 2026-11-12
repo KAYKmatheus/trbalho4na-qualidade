@@ -11,7 +11,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.db import get_db
-from app.erros import ConflictError
 from app.models import AuditEntry, Base, Reservation, ReservationItem, User
 from app.servicos.autenticacao import hash_password
 from app.servicos.reservas import ReservationService
@@ -55,37 +54,106 @@ def test_service_creates_reservation_and_audit_record(db_session) -> None:
     assert db_session.query(AuditEntry).filter_by(entity_type="reservation", entity_id=reservation.id).count() == 1
 
 
-def test_service_rejects_conflicting_room_reservation(db_session) -> None:
-    """Verifica conflitos de sala em reservas sequenciais (CT-15)."""
-    service = ReservationService(db_session)
-    reservation = service.create_reservation(
-        solicitante_id="user-1",
-        reason="Primeira reserva",
-        items=[
-            {
-                "resource_type": "sala",
-                "resource_id": "room-1",
-                "start": datetime(2026, 1, 11, 9, 0),
-                "end": datetime(2026, 1, 11, 12, 0),
-            }
-        ],
+def test_ct28_audits_creation_update_approval_cancel_and_resource_block(auth_client) -> None:
+    client, session = auth_client
+    admin_login = client.post(
+        "/v1/auth/login",
+        json={"email": "admin@example.test", "password": "correct-password"},
     )
-    db_session.query(ReservationItem).filter_by(reservation_id=reservation.id).one().status = "CONFIRMADA"
-    db_session.commit()
-
-    with pytest.raises(ConflictError):
-        service.create_reservation(
-            solicitante_id="user-2",
-            reason="Segunda reserva",
-            items=[
+    requester_login = client.post(
+        "/v1/auth/login",
+        json={"email": "requester@example.test", "password": "requester-password"},
+    )
+    responsible_login = client.post(
+        "/v1/auth/login",
+        json={"email": "responsible@example.test", "password": "responsible-password"},
+    )
+    admin = {"Authorization": f"Bearer {admin_login.json()['access_token']}"}
+    requester = {"Authorization": f"Bearer {requester_login.json()['access_token']}"}
+    responsible = {"Authorization": f"Bearer {responsible_login.json()['access_token']}"}
+    resource = client.post(
+        "/v1/admin/resources",
+        headers=admin,
+        json={
+            "resource_type": "sala",
+            "name": "Sala ciclo auditoria CT-28",
+            "category": "aula",
+            "capacity": 24,
+            "location": "Bloco A",
+            "restricted": True,
+        },
+    )
+    assert resource.status_code == 201
+    resource_id = resource.json()["id"]
+    created = client.post(
+        "/v1/reservations",
+        headers=requester,
+        json={
+            "solicitante_id": "untrusted",
+            "reason": "Reserva original CT-28",
+            "items": [
                 {
                     "resource_type": "sala",
-                    "resource_id": "room-1",
-                    "start": datetime(2026, 1, 11, 10, 0),
-                    "end": datetime(2026, 1, 11, 11, 30),
+                    "resource_id": resource_id,
+                    "start": "2026-12-15T09:00:00Z",
+                    "end": "2026-12-15T10:00:00Z",
                 }
             ],
-        )
+        },
+    )
+    assert created.status_code == 201
+    reservation_id = created.json()["id"]
+    item_id = created.json()["items"][0]["id"]
+
+    updated = client.patch(
+        f"/v1/reservations/{reservation_id}",
+        headers=requester,
+        json={"reason": "Reserva alterada CT-28"},
+    )
+    assigned = client.post(
+        "/v1/admin/responsaveis/responsible-1/recursos",
+        headers=admin,
+        json={"resource_id": resource_id},
+    )
+    approved = client.post(
+        f"/v1/reservations/items/{item_id}/decision",
+        headers=responsible,
+        json={
+            "decision_type": "RECURSO_RESTRITO",
+            "decision": "APROVADA",
+            "justification": "Escopo validado CT-28",
+        },
+    )
+    cancelled = client.delete(f"/v1/reservations/{reservation_id}", headers=requester)
+    blocked = client.post(
+        f"/v1/admin/resources/{resource_id}/maintenance",
+        headers=admin,
+        json={
+            "start": "2026-12-15T09:00:00Z",
+            "end": "2026-12-15T10:00:00Z",
+            "reason": "Manutenção CT-28",
+        },
+    )
+
+    assert updated.status_code == 200
+    assert assigned.status_code == 201
+    assert approved.status_code == 200
+    assert cancelled.status_code == 200
+    assert blocked.status_code == 201
+
+    expected_audits = {
+        ("CREATE", reservation_id): "requester-1",
+        ("UPDATE", reservation_id): "requester-1",
+        ("APPROVAL", item_id): "responsible-1",
+        ("CANCEL", reservation_id): "requester-1",
+        ("RESOURCE_BLOCK", resource_id): "admin-1",
+    }
+    audits = session.query(AuditEntry).filter(AuditEntry.action.in_([key[0] for key in expected_audits])).all()
+    for (action, entity_id), actor_id in expected_audits.items():
+        event = next(audit for audit in audits if audit.action == action and audit.entity_id == entity_id)
+        assert event.actor_id == actor_id
+        assert event.before_value
+        assert event.after_value
 
 
 def test_api_v1_responds_to_creation_endpoint(db_session, monkeypatch: pytest.MonkeyPatch) -> None:

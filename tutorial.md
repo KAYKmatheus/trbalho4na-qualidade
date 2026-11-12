@@ -69,7 +69,8 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 
 ## Passo 1 — Personas
 
-**Prompt:** _(cole aqui o prompt literal usado)_
+**Escopo realizado:** documentar objetivos, responsabilidades e necessidades
+dos perfis Administrador, Responsável e Solicitante.
 
 **Resultado:** `docs/prd/personas/administrador.md`, `responsavel.md` e `solicitante.md` com objetivos e responsabilidades.
 
@@ -77,7 +78,8 @@ Sistema que aloca salas, professores e materiais sem conflitos de horário, com 
 
 ## Passo 2 — Requisitos funcionais e regras de negócio
 
-**Prompt:** _(cole aqui o prompt literal usado)_
+**Escopo realizado:** definir requisitos funcionais e regras de negócio para
+consulta, criação e administração de reservas e recursos.
 
 **Resultado atual:** `docs/prd/requisitos-funcionais-sistema-academico.md`
 com RN01 a RN10 e FR-01 a FR-16, cada FR com critérios de aceite.
@@ -86,7 +88,8 @@ com RN01 a RN10 e FR-01 a FR-16, cada FR com critérios de aceite.
 
 ## Passo 3 — Requisitos não funcionais
 
-**Prompt:** _(cole aqui o prompt literal usado)_
+**Escopo realizado:** registrar requisitos não funcionais e distinguir metas
+propostas das metas que ainda dependem de validação.
 
 **Resultado atual:** `docs/prd/requisitos-nao-funcionais-sistema-academico.md`
 com NFR-01 a NFR-12 e metas marcadas como proposta.
@@ -95,7 +98,8 @@ com NFR-01 a NFR-12 e metas marcadas como proposta.
 
 ## Passo 4 — Modelagem de dados
 
-**Prompt:** _(cole aqui o prompt literal usado)_
+**Escopo realizado:** modelar em PostgreSQL as entidades e relações usadas
+pelos fluxos de reserva.
 
 **Resultado:** `docs/prd/modelagem-dados-sistema-academico.dbml` (PostgreSQL) com comentários sobre as garantias que o DBML não expressa: restrição de exclusão por intervalo, bloqueio de linha para material e auditoria append-only.
 
@@ -117,11 +121,15 @@ com NFR-01 a NFR-12 e metas marcadas como proposta.
 
 **Aprendizado:** tarefas que se repetem a cada passo viram skills para que a documentação não fique para trás.
 
-## Próximos passos
+## Validação registrada
 
-1. Validar as migrações e garantias de concorrência em PostgreSQL.
-2. Executar os testes de integração e concorrência no banco real.
-3. Executar o plano JMeter em ambiente de teste e arquivar as evidências.
+Na execução registrada em [evidências locais](./docs/qualidade/evidencias/validacao-limpeza-2026-11-11.txt),
+o Ruff passou, a aplicação foi importada com `py -c "import app.main"` e a
+suíte sem integração passou duas vezes: **60 aprovados e 3 testes de integração
+desmarcados** em cada execução. A medição local reportada foi **90,09% de
+linhas (1.091/1.211)** e **71,22% de ramos (198/278)**, conforme o
+[relatório de cobertura](./docs/qualidade/relatorio-cobertura.md). Essa execução
+usou Python 3.14.8; o alvo Python 3.12 ainda depende do CI.
 
 ## Passo 7 — Base da aplicação
 
@@ -147,6 +155,18 @@ escopos, disponibilidade, ciclo de vida de reservas, aprovações, manutenção,
 movimentação de materiais, notificações simuladas, relatórios e contrato
 OpenAPI. Os testes estão em `tests/` e `tests/bdd/`, associados aos 40 CTs.
 
-**Validação restante:** o conjunto local e as metas de cobertura são medidos no
-[relatório de cobertura](./docs/qualidade/relatorio-cobertura.md). PostgreSQL,
-Docker e JMeter devem ser validados no ambiente que os disponibilize.
+**Validação registrada:** [relatório de cobertura](./docs/qualidade/relatorio-cobertura.md)
+com 90,09% de linhas e 71,22% de ramos na execução local registrada.
+PostgreSQL, Docker, GitHub Actions e JMeter continuam pendentes de validação
+ambiental.
+
+## Decisões e pendências de entrega
+
+- O grupo confirmou manter `CONFIRMADA`; a decisão final está registrada no
+  [ADR-06](./docs/prd/adr-06-estados-da-reserva.md).
+- Testes PostgreSQL/concorrência, Docker Compose, imagem de contêiner e JMeter
+  continuam **pendentes de validação**. Não há evidência de execução do GitHub
+  Actions nem medições de desempenho neste registro.
+- O [checklist do CT-34](./docs/qualidade/evidencias/ct-34-checklist.md) segue
+  aguardando preenchimento manual. A cobertura da suíte registrada não aprova
+  esse caso.

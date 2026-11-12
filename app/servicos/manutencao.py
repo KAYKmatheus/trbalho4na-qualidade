@@ -54,6 +54,7 @@ class MaintenanceService:
                     action="RESOURCE_BLOCK",
                     payload=json.dumps({"start": start.isoformat(), "end": end.isoformat(), "reason": reason.strip()}),
                     actor_id=actor_id,
+                    before_value=json.dumps({"exists": False}, sort_keys=True),
                     after_value=json.dumps(
                         {"start": start.isoformat(), "end": end.isoformat(), "reason": reason.strip()},
                         sort_keys=True,

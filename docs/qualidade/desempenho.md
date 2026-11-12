@@ -22,22 +22,21 @@ falhas HTTP e assertions no relatório.
 ### Preparação
 
 1. Use uma instância descartável de PostgreSQL, inicializada com as migrations,
-   e inicie a API (`uvicorn app.main:app --host 0.0.0.0 --port 8000`).
+   configure `AUTH_SECRET_KEY` no ambiente e inicie a API
+   (`uvicorn app.main:app --host 0.0.0.0 --port 8000`).
 2. Popule o banco com volume representativo (por exemplo 200 salas, 500
-   professores, 1.000 materiais e 50.000 reservas históricas). Para o cenário
-   JMeter, prepare também 100 contas SOLICITANTE, 100 salas restritas distintas
-   e contas RESPONSAVEL com escopo de aprovação para cada sala.
-3. Crie localmente `tests/desempenho/reservas.csv` com cabeçalho e ao menos
-   100 linhas de dados (o JMeter ignora a primeira linha), no formato:
+   professores, 1.000 materiais e 50.000 reservas históricas). Para criar os
+   dados específicos do cenário JMeter, defina `DATABASE_URL` para o banco
+   PostgreSQL de teste (o nome do banco precisa conter `test`) e rode:
 
-   ```csv
-   requester_email,requester_password,responsible_email,responsible_password,resource_id
-   solicitante-001@example.test,senha-local,responsavel-001@example.test,senha-local,id-recurso-001
+   ```powershell
+   python tests/desempenho/preparar_dados.py
    ```
 
-   Inclua ao menos 100 linhas de dados. Use credenciais e identificadores
-   exclusivos do ambiente de teste; o CSV é ignorado pelo Git e não deve conter
-   dados de produção.
+   O script cria 100 contas SOLICITANTE, 100 contas RESPONSAVEL, 100 salas
+   restritas distintas e um escopo de aprovação por sala. Ele escreve as
+   credenciais geradas em `tests/desempenho/reservas.csv`; o arquivo é ignorado
+   pelo Git e não deve ser compartilhado nem usado com dados de produção.
 
 ### Execução
 
@@ -49,7 +48,7 @@ jmeter -n -t tests/desempenho/reservas.jmx `
   -Jthreads=100 -Jrampup=30 -Jduration=300 `
   -JdataFile=tests/desempenho/reservas.csv `
   -l tests/desempenho/resultados.jtl `
-  -e -o tests/desempenho/relatorio-html
+  -e -o tests/desempenho/relatorio-jmeter
 ```
 
 Para inspecionar o plano pela interface gráfica, execute
@@ -75,5 +74,7 @@ sobrescritas com `-J`. Não execute carga na produção.
 |---|---|---|---|---|---|---|---|
 | | | | | | | | |
 
-**Status atual:** plano JMeter preparado; execução e metas de desempenho
-pendentes de validação em PostgreSQL com os dados de carga descritos acima.
+**Status atual:** o plano e o gerador de dados estão preparados; execução do
+JMeter e metas de desempenho **pendentes de validação** em PostgreSQL. Não há
+medições de p95 ou taxa de erro registradas, portanto nenhuma meta foi declarada
+atingida.

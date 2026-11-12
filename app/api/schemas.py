@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from app.dominio.regras import StatusReserva
 
@@ -167,6 +167,14 @@ class ReservationItemInput(BaseModel):
             raise ValueError("Data deve incluir fuso horário.")
         return value
 
+    @field_validator("end")
+    @classmethod
+    def ensure_end_after_start(cls, value: datetime, info: ValidationInfo) -> datetime:
+        start = info.data.get("start")
+        if start is not None and value <= start:
+            raise ValueError("O fim deve ser posterior ao início.")
+        return value
+
 
 class ReservationCreate(BaseModel):
     """API payload for creating a reservation."""
@@ -174,6 +182,13 @@ class ReservationCreate(BaseModel):
     solicitante_id: str = Field(..., min_length=1)
     reason: str = Field(..., min_length=1)
     items: list[ReservationItemInput] = Field(..., min_length=1)
+
+    @field_validator("reason")
+    @classmethod
+    def ensure_nonblank_reason(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("A finalidade da reserva é obrigatória.")
+        return value
 
 
 class ReservationUpdate(BaseModel):

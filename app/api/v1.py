@@ -376,6 +376,15 @@ def get_utilization_report(
     return UtilizationReportRead.model_validate(report)
 
 
+@app.get("/v1/reservations", response_model=list[ReservationRead])
+def list_reservations(
+    session: Session = Depends(get_db),
+    user: CurrentUser = Depends(get_current_user),
+) -> list[ReservationRead]:
+    reservations = ReservationService(session).list_for_requester(solicitante_id=user.id)
+    return [ReservationRead.model_validate(reservation, from_attributes=True) for reservation in reservations]
+
+
 @app.post("/v1/reservations", response_model=ReservationRead, status_code=201)
 def create_reservation(
     payload: ReservationCreate,

@@ -27,6 +27,15 @@ class ReservationService:
     def __init__(self, session: Session):
         self.session = session
 
+    def list_for_requester(self, *, solicitante_id: str) -> list[Reservation]:
+        return list(
+            self.session.scalars(
+                select(Reservation)
+                .where(Reservation.solicitante_id == solicitante_id)
+                .order_by(Reservation.created_at.desc())
+            )
+        )
+
     @staticmethod
     def _conflict_context(
         resource_type: str,

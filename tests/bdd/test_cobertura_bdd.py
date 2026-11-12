@@ -129,6 +129,9 @@ SEM_CENARIO = {
     "tests/bdd/test_api_errors.py::test_nonexistent_resource_routes_return_not_found": (
         "Teste parametrizado de rotas administrativas com recurso inexistente."
     ),
+    "tests/test_reservation_listing.py::test_requester_lists_only_their_own_reservations_over_http": (
+        "Teste de isolamento da listagem de reservas do solicitante."
+    ),
 }
 
 SCENARIO_PATTERN = re.compile(r"^\s*Cenário(?:\s+de\s+fundo)?:\s*(.+)$")

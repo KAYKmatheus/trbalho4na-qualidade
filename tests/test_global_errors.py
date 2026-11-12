@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from app.api.v1 import app
+from app.main import app
 
 
 def test_unexpected_error_returns_generic_json_without_internal_details() -> None:

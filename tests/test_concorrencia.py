@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import text
 
 from app.db import init_db
-from app.erros import ConflictError
+from app.errors import ConflictError
 from app.models import Resource, User
 from app.servicos.reservas import ReservationService
 

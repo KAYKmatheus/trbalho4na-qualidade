@@ -34,6 +34,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install JavaScript test dependencies
+        run: npm ci --ignore-scripts
+      - name: Test JavaScript and collect coverage
+        run: npm run test:coverage
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -45,10 +53,11 @@ jobs:
         run: python -c "import app.main"
       - name: Ruff
         run: python -m ruff check .
-      - name: Tests and coverage (including integration and concurrency)
+      - name: Python tests and coverage
         run: >-
-          python -m pytest -o addopts=""
+          python -m pytest
           --cov=app --cov-branch
+          --cov-fail-under=80
           --cov-report=term-missing
           --cov-report=xml:coverage.xml
           --cov-report=json:coverage.json

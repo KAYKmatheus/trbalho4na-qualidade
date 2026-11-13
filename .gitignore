@@ -20,6 +20,7 @@ __pycache__/
 .coverage
 coverage.json
 coverage.xml
+coverage-js/
 htmlcov/
 reports/
 tests/desempenho/reservas.csv

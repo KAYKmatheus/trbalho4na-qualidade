@@ -76,9 +76,20 @@ horário.
 - Para gerar a cobertura e o relatório, execute:
 
   ```powershell
-  python -m pytest -o addopts="" --cov=app --cov-branch --cov-report=json:coverage.json
+  python -m pytest --cov=app --cov-branch --cov-fail-under=80 --cov-report=term-missing --cov-report=xml:coverage.xml --cov-report=json:coverage.json
   python -m tests.bdd.gerar_relatorio
   ```
+
+- A cobertura do JavaScript da interface usa Node.js 22. Instale as dependências
+  bloqueadas e execute os testes reais de `app/web/static/app.js` com:
+
+  ```powershell
+  npm ci --ignore-scripts
+  npm run test:coverage
+  ```
+
+  O comando valida cobertura mínima de 80% de linhas e 70% de branches e gera
+  `coverage-js/lcov.info`, consumido pelo SonarCloud.
 
 - **Interface web:** depois de iniciar a aplicação, abra
   [http://localhost:8000/app/index.html](http://localhost:8000/app/index.html).

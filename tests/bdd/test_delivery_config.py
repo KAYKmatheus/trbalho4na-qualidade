@@ -23,8 +23,9 @@ def test_ci_runs_quality_gates_for_pull_requests_and_principal() -> None:
     assert "fetch-depth: 0" in workflow
     assert 'python -c "import app.main"' in workflow
     assert "ruff check ." in workflow
-    assert 'python -m pytest -o addopts=""' in workflow
-    assert "integration and concurrency" in workflow
+    assert "python -m pytest" in workflow
+    assert "--cov-fail-under=80" in workflow
+    assert "Python tests and coverage" in workflow
     assert "covered_branches" in workflow
     assert "covered_lines" in workflow
     assert "num_statements" in workflow
@@ -36,6 +37,13 @@ def test_ci_runs_quality_gates_for_pull_requests_and_principal() -> None:
     assert "SONAR_TOKEN" in workflow
     assert "-Dsonar.coverage.exclusions=tests/**" in workflow
     assert "sonar.qualitygate.wait=true" in workflow
+    quality_job = workflow.split("\n  container:\n", 1)[0]
+    assert '-o addopts=""' not in quality_job
+    assert "--cov-fail-under=80" in quality_job
+    assert "actions/setup-node@v4" in quality_job
+    assert 'node-version: "22"' in quality_job
+    assert "npm ci --ignore-scripts" in quality_job
+    assert "npm run test:coverage" in quality_job
     assert "POSTGRES_PASSWORD: postgres" not in workflow
     assert "secrets.CI_POSTGRES_PASSWORD" in workflow
     assert workflow.count("${{ secrets.CI_POSTGRES_PASSWORD }}") == 6
@@ -63,6 +71,7 @@ def test_sonar_properties_do_not_embed_a_token() -> None:
     assert "sonar.projectKey=" in properties
     assert "sonar.sources=app" in properties
     assert "sonar.tests=tests" in properties
+    assert "sonar.javascript.lcov.reportPaths=coverage-js/lcov.info" in properties
     assert "sonar.coverage.exclusions=tests/**" in properties
     assert "sonar.token=" not in properties
 

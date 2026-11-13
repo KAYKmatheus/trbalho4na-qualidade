@@ -60,7 +60,7 @@ def test_cannot_cancel_reservation_in_use_over_http(auth_client) -> None:
 
     response = client.delete(f"/v1/reservations/{reservation_id}", headers=requester)
 
-    assert response.status_code == 409
+    assert response.status_code == 409, response.text
     assert "Transição de EM_USO para CANCELADA não permitida." in response.json()["detail"]
     assert session.query(Reservation).filter_by(id=reservation_id).one().status == "EM_USO"
 
@@ -100,7 +100,7 @@ def test_in_use_reservation_rejects_all_transitions_except_completion_over_http(
         json={"status": target_status},
     )
 
-    assert response.status_code == 409
+    assert response.status_code == 409, response.text
     assert f"Transição de EM_USO para {target_status} não permitida." in response.json()["detail"]
     assert session.query(Reservation).filter_by(id=reservation_id).one().status == "EM_USO"
 

@@ -27,6 +27,18 @@ class ReservationService:
     def __init__(self, session: Session):
         self.session = session
 
+
+    def list_for_requester(self, *, solicitante_id: str) -> list[Reservation]:
+        """List only reservations belonging to the requesting user."""
+        return list(
+            self.session.scalars(
+                select(Reservation).where(
+                    Reservation.solicitante_id == solicitante_id
+                )
+            ).all()
+        )
+
+
     @staticmethod
     def _conflict_context(
         resource_type: str,
@@ -178,7 +190,7 @@ class ReservationService:
         return resource
 
     def create_reservation(self, *, solicitante_id: str, reason: str, items: list[dict]) -> Reservation:
-        
+
         """Create a reservation and persist the matching audit record in the same transaction."""
         if not solicitante_id or not reason or not reason.strip():
             raise ValidationError("Solicitante e finalidade são obrigatórios.")
@@ -285,7 +297,7 @@ class ReservationService:
                 context=conflict_context,
             ) from exc
 
-            
+
 
     def update_reservation(
         self,
@@ -439,7 +451,11 @@ class ReservationService:
             if reservation is None:
                 return None
             before_status = reservation.status
-            next_status = transition_reservation_status(before_status, target_status)
+            try:
+                next_status = transition_reservation_status(before_status, target_status)
+            except ValidationError as exc:
+                 raise ConflictError(str(exc)) from exc
+
             reservation.status = next_status.value
             for item in reservation.items:
                 if item.status == before_status:
@@ -454,4 +470,4 @@ class ReservationService:
                 after_value=json.dumps({"status": next_status.value}, sort_keys=True),
             )
             self.session.flush()
-            return reservation  
+            return reservation

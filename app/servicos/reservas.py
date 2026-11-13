@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timezone
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from app.dominio.regras import (
@@ -178,6 +178,7 @@ class ReservationService:
         return resource
 
     def create_reservation(self, *, solicitante_id: str, reason: str, items: list[dict]) -> Reservation:
+        
         """Create a reservation and persist the matching audit record in the same transaction."""
         if not solicitante_id or not reason or not reason.strip():
             raise ValidationError("Solicitante e finalidade são obrigatórios.")
@@ -263,6 +264,28 @@ class ReservationService:
                     reason="CONCORRENCIA",
                 )
             raise ConflictError("Conflito detectado na reserva.") from exc
+        except OperationalError as exc:
+            # PostgreSQL: 40P01 = deadlock_detected
+            sqlstate = getattr(exc.orig, "sqlstate", None)
+
+            if sqlstate != "40P01" or conflict_context is None:
+                raise
+
+            conflict_context["cause"] = "CONCORRENCIA"
+
+            AuditService.record_avoided_conflict(
+                self.session,
+                actor_id=solicitante_id,
+                context=conflict_context,
+                reason="CONCORRENCIA",
+            )
+
+            raise ConflictError(
+                "Conflito de concorrência detectado na reserva.",
+                context=conflict_context,
+            ) from exc
+
+            
 
     def update_reservation(
         self,

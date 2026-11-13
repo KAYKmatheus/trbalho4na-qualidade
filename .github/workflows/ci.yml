@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - principal
+      - feature/ajustes-projeto
 
 permissions:
   contents: read

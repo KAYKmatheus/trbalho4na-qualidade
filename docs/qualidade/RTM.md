@@ -1,0 +1,60 @@
+# Matriz de rastreabilidade — RTM
+
+Fonte dos requisitos: [FR](../prd/requisitos-funcionais-sistema-academico.md)
+e [NFR](../prd/requisitos-nao-funcionais-sistema-academico.md). Os nomes de
+rotas, serviços, tabelas e nós pytest abaixo foram conferidos no código,
+nas migrações e nos arquivos de teste.
+
+O esquema implementado usa as tabelas `users`, `resources`, `resource_scopes`,
+`resource_blocks`, `reservations`, `reservation_items`, `approvals`,
+`material_movements`, `notifications` e `audit_entries`. O DBML foi alinhado
+ao código; `app/models.py` e `migrations/*.sql` são as fontes de verdade do
+esquema persistido.
+
+`Passou` significa que existe evidência de execução correspondente na coluna
+final. Testes existentes sem saída de execução correspondente permanecem
+`Pendente`.
+
+| Requisito (RF/RNF) | Regra (RN) | Risco | Rota/Serviço | Caso de teste (CT) | Nó de teste pytest | Evidência (link para arquivo) | Status |
+|---|---|---|---|---|---|---|---|
+| FR-01 | RN09 | Alto | `/v1/auth/login`, `/v1/auth/me`; `AuthenticationService`, `require_roles` | CT-01 a CT-05, CT-37 | [test_autenticacao.py](../../tests/bdd/test_autenticacao.py): `test_ct01_login_uses_generic_response_for_invalid_credentials`, `test_ct02_protected_route_rejects_missing_and_expired_tokens`, `test_ct03_requester_cannot_call_admin_only_dependency` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-02 | RN09 | Alto | `/v1/admin/users`, `/v1/admin/resources`; `AuthenticationService`, `ResourceService` | CT-06, CT-07, CT-40 | [test_recursos.py](../../tests/bdd/test_recursos.py): `test_ct06_admin_creates_updates_and_queries_resource_types`, `test_ct07_deactivating_resource_preserves_reservation_history`, `test_ct40_admin_assigns_and_removes_responsible_scope_with_audit` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-03 | RN02, RN03, RN06 | Médio | `/v1/resources/search`; `AvailabilityService` | CT-08, CT-09 | [test_disponibilidade.py](../../tests/bdd/test_disponibilidade.py): `test_ct08_search_applies_type_capacity_location_competency_and_period`, `test_ct09_search_excludes_blocked_and_occupied_resources` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-04 | RN01, RN05, RN10 | Alto | `POST /v1/reservations`; `ReservationService` | CT-10, CT-11, CT-12, CT-22, CT-39 | [test_reservas.py](../../tests/test_reservas.py): `test_api_v1_responds_to_creation_endpoint`; [test_api_errors.py](../../tests/bdd/test_api_errors.py): `test_ct11_reservation_validation_reports_invalid_field` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-05 | RN01, RN08 | Alto | `PATCH /v1/reservations/{reservation_id}`, `DELETE /v1/reservations/{reservation_id}`; `ReservationService` | CT-04, CT-13, CT-14 | [test_alteracao_cancelamento.py](../../tests/bdd/test_alteracao_cancelamento.py): `test_ct04_requester_cannot_change_or_cancel_another_users_reservation`, `test_ct13_conflicting_change_returns_409_and_preserves_original`, `test_ct14_cancel_changes_state_and_releases_resource` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-06 | RN02, RN03, RN06, RN07 | Alto | `POST /v1/reservations`; `ReservationService._validate_item_availability`, `AvailabilityService` | CT-15 a CT-18, CT-21, CT-24 | [test_api_errors.py](../../tests/bdd/test_api_errors.py): `test_ct15_overlapping_room_reservation_returns_http_409`, `test_ct18_material_over_stock_returns_http_409`; [test_manutencao.py](../../tests/bdd/test_manutencao.py): `test_ct24_resource_in_maintenance_cannot_be_reserved` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-07 | RN04 | Alto | `POST /v1/reservations`, `/v1/reservations/items/{item_id}/decision`; `ReservationService`, `ApprovalService` | CT-19, CT-20, CT-21 | [test_cenarios_executaveis.py](../../tests/bdd/test_cenarios_executaveis.py): `test_processar_requisições_simultâneas_pela_mesma_sala`, `test_respeitar_o_estoque_em_requisições_simultâneas_de_material` | [pendência PostgreSQL](./evidencias/README.md) | Pendente |
+| FR-08 | RN05, RN09 | Alto | `/v1/reservations/items/{item_id}/decision`; `ApprovalService` | CT-05, CT-21 a CT-23, CT-37 | [test_aprovacoes.py](../../tests/bdd/test_aprovacoes.py): `test_ct21_approval_rechecks_conflict_and_keeps_item_pending`, `test_ct22_restricted_resource_stays_pending_and_available_until_decision`, `test_ct23_decision_requires_justification_and_scope` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-09 | RN06 | Alto | `/v1/admin/resources/{resource_id}/maintenance`; `MaintenanceService`, `AvailabilityService` | CT-09, CT-24 | [test_manutencao.py](../../tests/bdd/test_manutencao.py): `test_ct24_resource_in_maintenance_cannot_be_reserved` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-10 | RN07 | Alto | `/v1/reservations/items/{item_id}/movements`, `/v1/reservations/items/{item_id}/material-balance`; `MaterialService` | CT-25 a CT-27 | [test_materiais.py](../../tests/bdd/test_materiais.py): `test_ct25_withdrawal_and_return_balance_is_calculated`, `test_ct26_return_above_withdrawn_units_is_rejected_without_record`, `test_ct27_unreturned_material_remains_unavailable` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-11 | RN08 | Alto | `AuditService`; `audit_entries`, `approvals`, `material_movements` e migração de imutabilidade | CT-28, CT-29, CT-38 | [test_reservas.py](../../tests/test_reservas.py): `test_ct28_audits_creation_update_approval_cancel_and_resource_block`; [test_postgres_immutability.py](../../tests/test_postgres_immutability.py): `test_ct29_immutable_tables_reject_update_delete_and_accept_insert` | [pendência PostgreSQL](./evidencias/README.md) | Pendente |
+| FR-12 | RN08 | Médio | `NotificationService`; `notifications` | CT-30 | [test_notificacoes.py](../../tests/bdd/test_notificacoes.py): `test_ct30_notifications_are_recorded_for_send_approve_reject_and_cancel` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-13 | RN08 | Alto | `GET /v1/admin/reports`; `ReportService` | CT-31, CT-32, CT-38 | [test_relatorios.py](../../tests/bdd/test_relatorios.py): `test_ct31_report_contains_utilization_teaching_load_and_conflict_count`, `test_ct32_conflict_counter_increases_for_each_refused_request` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-14 | — | Médio | `/app/index.html`, `/app/buscar.html`, `/app/reservar.html`, `/app/minhas.html`; arquivos estáticos | CT-34 | [test_web_static.py](../../tests/bdd/test_web_static.py): `test_static_pages_are_served_with_html_and_health_remains_available`; execução manual: [checklist CT-34](./evidencias/ct-34-checklist.md) | [checklist pendente](./evidencias/ct-34-checklist.md) | Pendente |
+| FR-15 | — | Médio | `/docs`; contrato OpenAPI em `app/api/v1.py` | CT-35 | [test_interface_api.py](../../tests/bdd/test_interface_api.py): `test_ct35_openapi_operations_match_registered_api_routes` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| FR-16 | RN03, RN09, RN10 | Alto | `/v1/reservations/items/{item_id}/decision`; `ApprovalService` | CT-36, CT-37, CT-39 | [test_aprovacoes.py](../../tests/bdd/test_aprovacoes.py): `test_ct36_responsible_validates_teacher_inside_scope`, `test_ct37_responsible_without_scope_cannot_decide`, `test_ct39_teacher_item_stays_pending_until_responsible_validation` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| NFR-01 | RN09 | Alto | `get_current_user`, `require_roles`; rotas `/v1/auth/*` e `/v1/admin/*` | CT-01 a CT-05, CT-37 | [test_autenticacao.py](../../tests/bdd/test_autenticacao.py): testes CT-01 a CT-03; [test_aprovacoes.py](../../tests/bdd/test_aprovacoes.py): `test_ct37_responsible_without_scope_cannot_decide` | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | Passou |
+| NFR-02 | RN09 | Alto | `GET /v1/reservations`; `ReservationService.list_for_requester` | CT-04 | [test_reservation_listing.py](../../tests/test_reservation_listing.py): `test_requester_lists_only_their_own_reservations_over_http` | [execução atual pendente de evidência](./evidencias/README.md) | Pendente |
+| NFR-03 | RN01 a RN07 | Alto | `reservation_items_no_overlap`; `ReservationService._validate_item_availability` | CT-15 a CT-21 | [test_cenarios_executaveis.py](../../tests/bdd/test_cenarios_executaveis.py): cenário concorrente CT-19 com `THREAD_COUNT`; [test_concorrencia.py](../../tests/test_concorrencia.py): `test_overlapping_material_reservations_respect_available_stock` | [pendência PostgreSQL](./evidencias/README.md) | Pendente |
+| NFR-04 | — | Alto | Pesquisa e criação/decisão de reservas; plano em `tests/desempenho/reservas.jmx` | — | Não há nó pytest para medição JMeter | [resultados de desempenho pendentes](./desempenho.md) | Pendente |
+| NFR-05 | — | Alto | Inicialização em `app/db.py`; persistência PostgreSQL | — | Não há teste de backup/restauração documentado | [pendência ambiental](./evidencias/README.md) | Pendente |
+| NFR-06 | RN01 | Médio | Erros HTTP em `app/api/v1.py`; mensagens em `app/web/static/app.js` | CT-11, CT-33 | [test_api_errors.py](../../tests/bdd/test_api_errors.py): `test_ct11_reservation_validation_reports_invalid_field`, `test_ct33_http_errors_use_details_and_never_look_successful` | [execução atual pendente de evidência](./evidencias/README.md) | Pendente |
+| NFR-07 | — | Médio | `/app/*`; `app/web/static/estilo.css` | CT-34 | [test_web_static.py](../../tests/bdd/test_web_static.py): `test_static_pages_are_served_with_html_and_health_remains_available`; [checklist manual](./evidencias/ct-34-checklist.md) | [checklist pendente](./evidencias/ct-34-checklist.md) | Pendente |
+| NFR-08 | — | Médio | Interface estática; matriz de navegadores ainda não definida | CT-34 | Não há nó automatizado de compatibilidade entre navegadores | [checklist pendente](./evidencias/ct-34-checklist.md) | Pendente |
+| NFR-09 | RN08 | Alto | `AuditService`; triggers em `migrations/003_auditoria_imutavel.sql` | CT-28, CT-29, CT-38 | [test_postgres_immutability.py](../../tests/test_postgres_immutability.py): `test_ct29_immutable_tables_reject_update_delete_and_accept_insert`; [test_postgres_ct38.py](../../tests/test_postgres_ct38.py): `test_ct38_each_avoided_conflict_is_audited_and_counted_by_report` | [pendência PostgreSQL](./evidencias/README.md) | Pendente |
+| NFR-10 | RN01 a RN10 | Médio | API, serviços, testes e documentos ligados aos requisitos | CT-35 | [test_cobertura_bdd.py](../../tests/bdd/test_cobertura_bdd.py): `test_every_pytest_test_has_scenario_or_explicit_reason`, `test_every_scenario_test_reference_exists` | [relatório de cobertura](./relatorio-cobertura.md) | Passou |
+| NFR-11 | RN01 a RN10 | Alto | Fluxos funcionais em `/v1/*` e `/app/*` | CT-01 a CT-40 | [test_fluxo_completo.py](../../tests/e2e/test_fluxo_completo.py): `test_full_reservation_flow_uses_http_only`; demais nós estão listados nas linhas FR acima | [execução atual pendente de evidência](./evidencias/README.md) | Pendente |
+| NFR-12 | RN01 a RN10 | Médio | `Dockerfile`, `docker-compose.yml`, `.github/workflows/ci.yml` | — | [test_delivery_config.py](../../tests/bdd/test_delivery_config.py): `test_container_uses_python_312_nonroot_and_healthcheck`, `test_compose_app_waits_for_healthy_postgres_and_docker_context_is_filtered` | [CI e Docker pendentes](./evidencias/README.md) | Pendente |
+
+## Totais
+
+| Medida | Total |
+|---|---:|
+| Requisitos funcionais e não funcionais nesta RTM | 28 |
+| Requisitos com ao menos um nó pytest indicado | 25 |
+| Requisitos com evidência de execução e status `Passou` | 15 |
+
+Os totais acima são contagens das linhas desta matriz, não resultados de uma
+nova execução. A [evidência local](./evidencias/validacao-limpeza-2026-11-11.txt)
+registra 60 testes aprovados e 3 desmarcados naquela execução; não comprova os
+testes de integração adicionados depois nem a validação manual do CT-34.

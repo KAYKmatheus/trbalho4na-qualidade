@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Buscar recursos — AlocaSenac</title>
+  <link rel="stylesheet" href="/app/estilo.css">
+  <script src="/app/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/app/buscar.html">AlocaSenac</a>
+    <nav aria-label="Navegação principal">
+      <a href="/app/buscar.html" aria-current="page">Buscar recursos</a>
+      <a href="/app/reservar.html">Nova reserva</a>
+      <a href="/app/minhas.html">Minhas reservas</a>
+      <button type="button" data-logout>Sair</button>
+    </nav>
+  </header>
+  <main class="container">
+    <h1>Buscar recursos</h1>
+    <form id="search-form" class="panel">
+      <label for="resource-type">Tipo de recurso</label>
+      <select id="resource-type" name="resource_type">
+        <option value="">Todos</option>
+        <option value="sala">Sala</option>
+        <option value="professor">Professor</option>
+        <option value="material">Material</option>
+      </select>
+      <label for="capacity">Capacidade mínima</label>
+      <input id="capacity" name="capacity" type="number" min="1">
+      <label for="start">Início</label>
+      <input id="start" name="start" type="datetime-local" required>
+      <label for="end">Fim</label>
+      <input id="end" name="end" type="datetime-local" required>
+      <button type="submit">Buscar</button>
+    </form>
+    <p id="search-message" class="message" role="status" aria-live="polite"></p>
+    <section id="search-results" aria-label="Resultados da busca"></section>
+  </main>
+</body>
+</html>

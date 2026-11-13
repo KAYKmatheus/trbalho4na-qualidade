@@ -26,6 +26,27 @@ horário.
   [casos de teste CT-01 a CT-40](./docs/qualidade/casos-de-teste.md)
 - [Segurança](./docs/qualidade/seguranca.md), [desempenho](./docs/qualidade/desempenho.md)
   e [relatório de cobertura](./docs/qualidade/relatorio-cobertura.md)
+- [Arquitetura](./docs/prd/arquitetura.md), [diagrama de contexto](./docs/prd/diagrama-contexto.md),
+  [fluxos de sequência](./docs/prd/fluxos-sequencia.md), [modelagem estática](./docs/prd/modelagem-estatica.md)
+  e [modelagem dinâmica](./docs/prd/modelagem-dinamica.md)
+- [Ajustes e decisões sobre lacunas do PRD](./docs/prd/ajustes-decisoes-lacunas.md)
+- ADRs: ADR-01 a ADR-06 estão listadas abaixo.
+- [RTM — matriz de rastreabilidade](./docs/qualidade/RTM.md) e
+  [matriz PRD](./docs/prd/matriz-rastreabilidade.md)
+- [Defeitos confirmados](./docs/qualidade/defeitos.md) e
+  [relatório final](./docs/relatorio-final.md)
+- [Tutorial principal de implementação](./tutorial-implementacao.md) —
+  [tutorial.md aponta para ele](./tutorial.md)
+- [Roteiro de apresentação](./docs/apresentacao-roteiro.md)
+
+### Decisões de arquitetura
+
+- [ADR-01 — integridade e concorrência](./docs/prd/adr-01-integridade-concorrencia.md)
+- [ADR-02 — escopo do Responsável](./docs/prd/adr-02-escopo-responsavel.md)
+- [ADR-03 — auditoria imutável](./docs/prd/adr-03-auditoria-imutavel.md)
+- [ADR-04 — disponibilidade de materiais](./docs/prd/adr-04-disponibilidade-material.md)
+- [ADR-05 — API e separação de camadas](./docs/prd/adr-05-api-e-separacao-de-camadas.md)
+- [ADR-06 — estados da reserva](./docs/prd/adr-06-estados-da-reserva.md)
 
 ## Desenvolvimento
 
@@ -56,6 +77,13 @@ horário.
   python -m pytest -o addopts="" --cov=app --cov-branch --cov-report=json:coverage.json
   python -m tests.bdd.gerar_relatorio
   ```
+
+- **Interface web:** depois de iniciar a aplicação, abra
+  [http://localhost:8000/app/index.html](http://localhost:8000/app/index.html).
+  As telas de busca, criação e gerenciamento das próprias reservas ficam
+  disponíveis em `/app/buscar.html`, `/app/reservar.html` e `/app/minhas.html`.
+  A validação visual e por teclado do CT-34 ainda depende do checklist manual
+  em [ct-34-checklist.md](./docs/qualidade/evidencias/ct-34-checklist.md).
 
 - O plano de carga JMeter e os passos para executá-lo estão em
   [desempenho](./docs/qualidade/desempenho.md). A execução ainda depende de

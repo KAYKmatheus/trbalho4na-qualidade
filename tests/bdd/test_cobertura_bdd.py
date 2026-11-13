@@ -60,6 +60,9 @@ SEM_CENARIO = {
     "tests/bdd/test_delivery_config.py::test_ci_runs_quality_gates_for_pull_requests_and_principal": (
         "Teste de configuração do CI."
     ),
+    "tests/bdd/test_delivery_config.py::test_compose_app_waits_for_healthy_postgres_and_docker_context_is_filtered": (
+        "Verifica a infraestrutura Docker sem cenário Gherkin próprio."
+    ),
     "tests/bdd/test_delivery_config.py::test_sonar_properties_do_not_embed_a_token": (
         "Teste de configuração do Sonar."
     ),
@@ -93,8 +96,44 @@ SEM_CENARIO = {
     "tests/test_regras_dominio.py::test_final_reservation_status_cannot_transition": (
         "Teste unitário de estado final."
     ),
-    "tests/test_reservas.py::test_home_page_renders_reservation_dashboard": (
-        "Teste de renderização da página inicial."
+    "tests/test_regras_dominio.py::test_invalid_interval_is_rejected": (
+        "Teste unitário da validação de intervalos inválidos."
+    ),
+    "tests/test_reservation_em_uso.py::test_cannot_cancel_reservation_in_use_over_http": (
+        "Teste de transição HTTP de EM_USO para cancelamento, sem cenário Gherkin próprio."
+    ),
+    (
+        "tests/test_reservation_em_uso.py::"
+        "test_in_use_reservation_rejects_all_transitions_except_completion_over_http"
+    ): (
+        "Teste parametrizado das transições proibidas a partir de EM_USO."
+    ),
+    "tests/test_reservation_em_uso.py::test_in_use_reservation_can_be_completed_over_http": (
+        "Teste de conclusão HTTP de uma reserva EM_USO."
+    ),
+    (
+        "tests/test_global_errors.py::"
+        "test_unexpected_error_returns_generic_json_without_internal_details"
+    ): (
+        "Teste de contrato do handler global para erros inesperados."
+    ),
+    "tests/e2e/test_fluxo_completo.py::test_full_reservation_flow_uses_http_only": (
+        "Fluxo ponta a ponta sem cenário Gherkin próprio."
+    ),
+    "tests/e2e/test_fluxo_completo.py::test_overlapping_room_reservation_is_rejected_over_http": (
+        "Conflito ponta a ponta sem cenário Gherkin próprio."
+    ),
+    "tests/bdd/test_api_errors.py::test_nonexistent_resource_routes_return_not_found": (
+        "Teste parametrizado de rotas administrativas com recurso inexistente."
+    ),
+    "tests/test_reservation_listing.py::test_requester_lists_only_their_own_reservations_over_http": (
+        "Teste de isolamento da listagem de reservas do solicitante."
+    ),
+    "tests/bdd/test_web_static.py::test_static_pages_are_served_with_html_and_health_remains_available": (
+        "Verifica a entrega das páginas web estáticas e a saúde da API."
+    ),
+    "tests/bdd/test_web_static.py::test_root_redirects_to_static_login_page": (
+        "Verifica o redirecionamento da raiz para a interface web."
     ),
 }
 

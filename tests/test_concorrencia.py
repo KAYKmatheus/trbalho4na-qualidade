@@ -4,12 +4,11 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import func, select, text
+from sqlalchemy import text
 
 from app.db import init_db
-from app.dominio.regras import ACTIVE_RESERVATION_STATUSES
 from app.erros import ConflictError
-from app.models import ReservationItem, Resource, User
+from app.models import Resource, User
 from app.servicos.reservas import ReservationService
 
 START = datetime(2026, 12, 1, 9, 0, tzinfo=timezone.utc)

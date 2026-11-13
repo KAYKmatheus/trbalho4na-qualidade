@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minhas reservas — AlocaSenac</title>
+  <link rel="stylesheet" href="/app/estilo.css">
+  <script src="/app/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/app/buscar.html">AlocaSenac</a>
+    <nav aria-label="Navegação principal">
+      <a href="/app/buscar.html">Buscar recursos</a>
+      <a href="/app/reservar.html">Nova reserva</a>
+      <a href="/app/minhas.html" aria-current="page">Minhas reservas</a>
+      <button type="button" data-logout>Sair</button>
+    </nav>
+  </header>
+  <main class="container">
+    <h1>Minhas reservas</h1>
+    <p id="reservations-message" class="message" role="status" aria-live="polite"></p>
+    <div class="table-wrap">
+      <table id="reservations-table">
+        <thead>
+          <tr>
+            <th scope="col">Estado</th>
+            <th scope="col">Período</th>
+            <th scope="col">Recursos</th>
+            <th scope="col">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="reservations-list"></tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

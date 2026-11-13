@@ -64,7 +64,8 @@ def clean_postgres_database(pg_engine: Engine) -> Generator[None, None, None]:
         with pg_engine.begin() as connection:
             connection.execute(
                 text(
-                    "TRUNCATE reservation_items, reservations, resource_blocks, resources, users, notifications "
+                    "TRUNCATE audit_entries, reservation_items, reservations, "
+                    "resource_blocks, resources, users, notifications "
                     "RESTART IDENTITY CASCADE"
                 )
             )

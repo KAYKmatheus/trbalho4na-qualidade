@@ -34,6 +34,7 @@ addopts = "-q -m 'not integration'"
 markers = [
   "integration: requires a PostgreSQL test database",
   "concorrencia: exercises concurrent reservation behavior",
+  "e2e: exercises complete user flows through the HTTP API",
 ]
 
 [tool.coverage.run]

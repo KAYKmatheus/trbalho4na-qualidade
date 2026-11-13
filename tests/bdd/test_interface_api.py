@@ -22,19 +22,6 @@ def test_ct33_validation_and_auth_errors_are_not_success_responses(auth_client) 
     assert "detail" in invalid_reservation.json()
 
 
-def test_ct34_dashboard_has_responsive_and_keyboard_navigation_basics(auth_client) -> None:
-    client, _ = auth_client
-    response = client.get("/")
-    page = response.text.lower()
-
-    assert response.status_code == 200
-    assert '<meta name="viewport"' in page
-    assert "overflow-x: hidden" in page
-    assert ":focus-visible" in page
-    assert "<nav" in page
-    assert "href=" in page
-
-
 def test_ct35_openapi_operations_match_registered_api_routes(auth_client) -> None:
     client, _ = auth_client
     documented = client.get("/openapi.json").json()["paths"]

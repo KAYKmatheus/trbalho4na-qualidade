@@ -1,41 +1,59 @@
-# Relatório de cobertura e execução — Parte 2
+# Relatório de cobertura
 
-## Resultado local
+- Data: 2026-11-12
+- Commit-base: `76803453f9cd7fa3beaeb3e577e4e96c17fbd3ff` (medição feita na árvore de trabalho atual).
+- Comando: `py -m pytest -o addopts="" --cov=app --cov-branch --cov-report=term-missing --cov-report=json:coverage.json`
+- Linhas: 91.36% (1121/1227); meta: 80% — atingida.
+- Ramos: 75.18% (212/282); meta: 70% — atingida.
+- Testes pytest: 84
+- Testes com cenário: 55
+- Testes sem cenário: 29
 
-Execução em Python 3.14.8 (o alvo do CI é Python 3.12):
+## Cobertura por módulo
+
+| Módulo | Linhas cobertas | Ramos cobertos |
+|---|---:|---:|
+| `app/__init__.py` | 0/0 (100.00%) | 0/0 (100.00%) |
+| `app/api/__init__.py` | 0/0 (100.00%) | 0/0 (100.00%) |
+| `app/api/deps.py` | 32/32 (100.00%) | 4/4 (100.00%) |
+| `app/api/schemas.py` | 138/141 (97.87%) | 5/8 (62.50%) |
+| `app/api/v1.py` | 172/196 (87.76%) | 15/16 (93.75%) |
+| `app/config.py` | 8/8 (100.00%) | 0/0 (100.00%) |
+| `app/db.py` | 75/75 (100.00%) | 29/30 (96.67%) |
+| `app/dominio/__init__.py` | 0/0 (100.00%) | 0/0 (100.00%) |
+| `app/dominio/regras.py` | 40/46 (86.96%) | 8/12 (66.67%) |
+| `app/erros.py` | 7/7 (100.00%) | 0/0 (100.00%) |
+| `app/main.py` | 4/4 (100.00%) | 2/2 (100.00%) |
+| `app/models.py` | 111/111 (100.00%) | 0/0 (100.00%) |
+| `app/servicos/__init__.py` | 0/0 (100.00%) | 0/0 (100.00%) |
+| `app/servicos/aprovacoes.py` | 62/73 (84.93%) | 20/30 (66.67%) |
+| `app/servicos/auditoria.py` | 12/12 (100.00%) | 0/0 (100.00%) |
+| `app/servicos/autenticacao.py` | 68/75 (90.67%) | 7/10 (70.00%) |
+| `app/servicos/disponibilidade.py` | 41/44 (93.18%) | 19/24 (79.17%) |
+| `app/servicos/manutencao.py` | 24/26 (92.31%) | 6/8 (75.00%) |
+| `app/servicos/materiais.py` | 51/57 (89.47%) | 10/16 (62.50%) |
+| `app/servicos/notificacoes.py` | 9/9 (100.00%) | 0/0 (100.00%) |
+| `app/servicos/recursos.py` | 78/87 (89.66%) | 21/28 (75.00%) |
+| `app/servicos/relatorios.py` | 37/43 (86.05%) | 9/16 (56.25%) |
+| `app/servicos/reservas.py` | 152/181 (83.98%) | 57/78 (73.08%) |
+
+## Lacunas conhecidas
+
+- `app/api/schemas.py`: ramos 62.50% < 70%.
+- `app/dominio/regras.py`: ramos 66.67% < 70%.
+- `app/servicos/aprovacoes.py`: ramos 66.67% < 70%.
+- `app/servicos/materiais.py`: ramos 62.50% < 70%.
+- `app/servicos/relatorios.py`: ramos 56.25% < 70%.
+
+## Cenários sem teste mapeado
+
+- Nenhum cenário sem teste mapeado.
+
+## Como reproduzir
+
+Na raiz do repositório, gere os dados e o relatório:
 
 ```text
-py -m pytest -m "not integration" --cov=app --cov-branch --cov-report=term-missing
-60 passed, 3 deselected
-Linhas: 90,09% (1091/1211; meta CI: 80%)
-Ramos: 71,22% (198/278; meta CI: 70%)
+py -m pytest -o addopts="" --cov=app --cov-branch --cov-report=term-missing --cov-report=json:coverage.json
+py -m tests.bdd.gerar_relatorio
 ```
-
-O cálculo de linhas considera `covered_lines / num_statements`; o de ramos
-considera `covered_branches / num_branches`. O workflow aplica os dois limites
-separadamente. Os três testes marcados como integração/concorrência foram
-excluídos desta execução local; precisam rodar no job com PostgreSQL.
-
-## Estado da validação dos CTs
-
-| Resultado | CTs | Observações |
-|---|---|---|---|
-| Aprovado nos testes locais | CT-01 a CT-10, CT-13, CT-14, CT-21 a CT-27, CT-30 a CT-32, CT-35 a CT-37, CT-39, CT-40 | Evidência de execução ligada na tabela de [casos de teste](./casos-de-teste.md) |
-| Parcial | CT-11, CT-15, CT-18, CT-20, CT-28, CT-33, CT-34, CT-38 | Limites do teste executado estão descritos no registro por CT |
-| Não executado | CT-12, CT-16, CT-17, CT-19, CT-29 | CT-19 exige disputa concorrente PostgreSQL; CT-29 exige validar triggers PostgreSQL |
-| Validação ambiental pendente | NFR de contêiner/CI e CT-34 em navegador real; tarefa 34 | Docker, GitHub Actions, JMeter e PostgreSQL real não foram executados localmente |
-
-Os três testes com marcador `integration` foram excluídos pela configuração
-local. Docker, JMeter e ferramentas/serviço PostgreSQL não estão disponíveis
-neste ambiente. O cenário de carga e as migrations ainda precisam de validação
-em PostgreSQL; nenhuma meta de latência é declarada como atingida.
-
-A saída detalhada de lint, importação, duas execuções da suíte e cobertura está
-em [evidência local](./evidencias/validacao-limpeza-2026-11-11.txt).
-
-## Configuração da qualidade
-
-- Ruff roda em todo Pull Request e em push para `principal`.
-- O CI exige pelo menos 80% de linhas e 70% de ramos, avaliados separadamente.
-- O scan SonarCloud é habilitado quando o segredo `SONAR_TOKEN` estiver
-  cadastrado em GitHub Actions. A chave não é armazenada no repositório.

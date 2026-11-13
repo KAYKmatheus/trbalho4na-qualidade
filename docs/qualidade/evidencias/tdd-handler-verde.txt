@@ -1,0 +1,57 @@
+Data: 2026-11-12 | Commit do teste: 7a2b651f597a4efdefeafe0f31699394ea92c4b3
+
+Comando: py -m pytest tests/test_global_errors.py -o addopts=''
+
+============================= test session starts =============================
+
+platform win32 -- Python 3.14.8, pytest-8.3.3, pluggy-1.7.0
+
+rootdir: C:\Users\frede\Downloads\4NA QDS\trbalho4na-qualidade
+
+configfile: pyproject.toml
+
+plugins: anyio-4.16.0, bdd-7.3.0, cov-5.0.0
+
+collected 1 item
+
+
+
+tests\test_global_errors.py .                                            [100%]
+
+
+
+============================== warnings summary ===============================
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\testclient.py:40
+
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py:40: 25 warnings
+
+tests/test_global_errors.py: 4 warnings
+
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\starlette\_utils.py:40: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+
+
+..\..\..\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py:233: 21 warnings
+
+tests/test_global_errors.py: 1 warning
+
+  C:\Users\frede\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+======================= 1 passed, 52 warnings in 0.18s ========================
+
+਍Exit code observado: 0

@@ -115,7 +115,19 @@ if (loginForm) {
         throw new Error("O navegador não permitiu guardar a sessão. Verifique as configurações e tente novamente.");
       }
 
-      window.location.assign("/app/buscar.html");
+      const usuario = await apiRequest("/v1/auth/me");
+
+      const paginas = {
+        SOLICITANTE: "/app/buscar.html",
+        RESPONSAVEL: "/app/responsavel.html",
+        ADMIN: "/app/admin.html",
+      };
+
+      if (!paginas[usuario.role]) {
+        throw new Error("Perfil de usuário não reconhecido.");
+      }
+
+      window.location.assign(paginas[usuario.role]);
     } catch (error) {
       const messageText = error.status === 401 ? "E-mail ou senha inválidos." : error.message;
       showMessage(message, messageText || "Não foi possível entrar. Tente novamente.");

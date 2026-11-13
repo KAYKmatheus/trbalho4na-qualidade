@@ -9,6 +9,7 @@ from datetime import datetime
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import Response
 from pydantic import ValidationError as PydanticValidationError
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import CurrentUser, get_current_user, require_roles
@@ -33,6 +34,7 @@ from app.api.schemas import (
     UtilizationReportRead,
 )
 from app.db import get_db, init_db
+from app.models import Reservation, ReservationItem, Resource, ResourceScope, User
 from app.erros import ConflictError, PermissaoNegadaError, ValidationError
 from app.servicos.aprovacoes import ApprovalService
 from app.servicos.autenticacao import AuthenticationService
@@ -74,6 +76,23 @@ def login(payload: LoginRequest, session: Session = Depends(get_db)) -> LoginRes
 @app.get("/v1/auth/me")
 def current_user(user: CurrentUser = Depends(get_current_user)) -> dict[str, str]:
     return {"id": user.id, "name": user.name, "email": user.email, "role": user.role}
+
+
+
+@app.get("/v1/admin/users", response_model=list[UserRead])
+def list_admin_users(
+    session: Session = Depends(get_db),
+    _: CurrentUser = Depends(require_roles("ADMIN")),
+) -> list[UserRead]:
+    """Lista contas para administração, sem expor senhas."""
+    usuarios = session.scalars(
+        select(User).order_by(User.name)
+    ).all()
+
+    return [
+        UserRead.model_validate(usuario, from_attributes=True)
+        for usuario in usuarios
+    ]
 
 
 @app.post("/v1/admin/users", response_model=UserRead, status_code=201)
@@ -244,6 +263,43 @@ def search_resources(
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return [ResourceAvailabilityRead.model_validate(resource) for resource in resources]
+
+
+
+@app.get("/v1/responsavel/pendencias")
+def list_pending_approvals(
+    session: Session = Depends(get_db),
+    user: CurrentUser = Depends(require_roles("RESPONSAVEL")),
+) -> list[dict]:
+    """Lista somente itens pendentes no escopo do Responsável autenticado."""
+    consulta = (
+        select(ReservationItem, Reservation, Resource)
+        .join(Reservation, Reservation.id == ReservationItem.reservation_id)
+        .join(Resource, Resource.id == ReservationItem.resource_id)
+        .join(ResourceScope, ResourceScope.resource_id == Resource.id)
+        .where(
+            ResourceScope.responsible_id == user.id,
+            ReservationItem.status == "PENDENTE",
+            Reservation.status == "PENDENTE",
+        )
+        .order_by(ReservationItem.start)
+    )
+
+    resultados = session.execute(consulta).all()
+
+    return [
+        {
+            "item_id": item.id,
+            "resource_name": recurso.name,
+            "resource_type": item.resource_type,
+            "requester_id": reserva.solicitante_id,
+            "reason": reserva.reason,
+            "start": item.start.isoformat(),
+            "end": item.end.isoformat(),
+            "status": item.status,
+        }
+        for item, reserva, recurso in resultados
+    ]
 
 
 @app.post("/v1/reservations/items/{item_id}/decision", response_model=ReservationRead)

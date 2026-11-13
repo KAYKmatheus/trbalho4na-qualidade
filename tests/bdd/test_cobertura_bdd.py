@@ -12,6 +12,21 @@ ROOT = Path(__file__).resolve().parents[2]
 TESTS_DIR = ROOT / "tests"
 
 SEM_CENARIO = {
+    "tests/bdd/test_perfis_paineis.py::test_solicitante_nao_pode_listar_usuarios": (
+        "Teste de segurança da nova rota administrativa: Solicitante recebe 403."
+    ),
+    "tests/bdd/test_perfis_paineis.py::test_responsavel_nao_pode_listar_usuarios": (
+        "Teste de segurança da nova rota administrativa: Responsável recebe 403."
+    ),
+    "tests/bdd/test_perfis_paineis.py::test_admin_lista_usuarios_sem_expor_senhas": (
+        "Teste de contrato da listagem administrativa sem exposição de credenciais."
+    ),
+    "tests/bdd/test_perfis_paineis.py::test_solicitante_nao_pode_consultar_pendencias": (
+        "Teste de autorização da nova rota de pendências do Responsável."
+    ),
+    "tests/bdd/test_perfis_paineis.py::test_responsavel_ve_apenas_pendencias_do_seu_escopo": (
+        "Teste de isolamento das solicitações pelo escopo de recursos do Responsável."
+    ),
     "tests/bdd/test_api_errors.py::test_admin_resource_and_scope_errors_are_explicit": (
         "Teste de erros transversais da API sem cenário Gherkin próprio."
     ),

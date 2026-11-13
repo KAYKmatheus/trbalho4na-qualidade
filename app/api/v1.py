@@ -34,8 +34,8 @@ from app.api.schemas import (
     UtilizationReportRead,
 )
 from app.db import get_db, init_db
-from app.models import Reservation, ReservationItem, Resource, ResourceScope, User
 from app.erros import ConflictError, PermissaoNegadaError, ValidationError
+from app.models import Reservation, ReservationItem, Resource, ResourceScope, User
 from app.servicos.aprovacoes import ApprovalService
 from app.servicos.autenticacao import AuthenticationService
 from app.servicos.disponibilidade import AvailabilityService

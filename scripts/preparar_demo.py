@@ -9,7 +9,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session
 
 from app.db import init_db
-from app.models import User, Resource, ResourceScope
+from app.models import Resource, ResourceScope, User
 from app.servicos.autenticacao import hash_password
 
 

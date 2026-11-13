@@ -64,13 +64,27 @@ jobs:
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Prepare Sonar TypeScript configuration
+        if: steps.sonar.outputs.enabled == 'true'
+        run: |
+          cat > tsconfig.sonar.json <<'EOF'
+          {
+            "compilerOptions": {
+              "allowJs": true,
+              "noEmit": true
+            },
+            "include": ["app/web/static/app.js"],
+            "exclude": [".aiox-core/**", "node_modules/**"]
+          }
+          EOF
       - name: SonarCloud scan
         if: steps.sonar.outputs.enabled == 'true'
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >-
+            -Dsonar.typescript.tsconfigPaths=tsconfig.sonar.json
             -Dsonar.coverage.exclusions=tests/**
             -Dsonar.qualitygate.wait=true
 

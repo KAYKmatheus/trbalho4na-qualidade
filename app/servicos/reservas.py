@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timezone
 
 from sqlalchemy import func, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
 from app.dominio.regras import (
@@ -26,15 +26,6 @@ class ReservationService:
 
     def __init__(self, session: Session):
         self.session = session
-
-    def list_for_requester(self, *, solicitante_id: str) -> list[Reservation]:
-        return list(
-            self.session.scalars(
-                select(Reservation)
-                .where(Reservation.solicitante_id == solicitante_id)
-                .order_by(Reservation.created_at.desc())
-            )
-        )
 
     @staticmethod
     def _conflict_context(
@@ -187,6 +178,7 @@ class ReservationService:
         return resource
 
     def create_reservation(self, *, solicitante_id: str, reason: str, items: list[dict]) -> Reservation:
+        
         """Create a reservation and persist the matching audit record in the same transaction."""
         if not solicitante_id or not reason or not reason.strip():
             raise ValidationError("Solicitante e finalidade são obrigatórios.")
@@ -272,6 +264,28 @@ class ReservationService:
                     reason="CONCORRENCIA",
                 )
             raise ConflictError("Conflito detectado na reserva.") from exc
+        except OperationalError as exc:
+            # PostgreSQL: 40P01 = deadlock_detected
+            sqlstate = getattr(exc.orig, "sqlstate", None)
+
+            if sqlstate != "40P01" or conflict_context is None:
+                raise
+
+            conflict_context["cause"] = "CONCORRENCIA"
+
+            AuditService.record_avoided_conflict(
+                self.session,
+                actor_id=solicitante_id,
+                context=conflict_context,
+                reason="CONCORRENCIA",
+            )
+
+            raise ConflictError(
+                "Conflito de concorrência detectado na reserva.",
+                context=conflict_context,
+            ) from exc
+
+            
 
     def update_reservation(
         self,
@@ -418,29 +432,26 @@ class ReservationService:
         target_status: str,
         actor_id: str,
     ) -> Reservation | None:
-        try:
-            with self.session.begin():
-                reservation = self.session.scalar(
-                    select(Reservation).where(Reservation.id == reservation_id).with_for_update()
-                )
-                if reservation is None:
-                    return None
-                before_status = reservation.status
-                next_status = transition_reservation_status(before_status, target_status)
-                reservation.status = next_status.value
-                for item in reservation.items:
-                    if item.status == before_status:
-                        item.status = next_status.value
-                self._record_audit(
-                    entity_type="reservation",
-                    entity_id=reservation.id,
-                    action="STATUS_TRANSITION",
-                    payload={"status": next_status.value},
-                    actor_id=actor_id,
-                    before_value=json.dumps({"status": before_status}, sort_keys=True),
-                    after_value=json.dumps({"status": next_status.value}, sort_keys=True),
-                )
-                self.session.flush()
-                return reservation
-        except ValidationError as exc:
-            raise ConflictError(str(exc)) from exc
+        with self.session.begin():
+            reservation = self.session.scalar(
+                select(Reservation).where(Reservation.id == reservation_id).with_for_update()
+            )
+            if reservation is None:
+                return None
+            before_status = reservation.status
+            next_status = transition_reservation_status(before_status, target_status)
+            reservation.status = next_status.value
+            for item in reservation.items:
+                if item.status == before_status:
+                    item.status = next_status.value
+            self._record_audit(
+                entity_type="reservation",
+                entity_id=reservation.id,
+                action="STATUS_TRANSITION",
+                payload={"status": next_status.value},
+                actor_id=actor_id,
+                before_value=json.dumps({"status": before_status}, sort_keys=True),
+                after_value=json.dumps({"status": next_status.value}, sort_keys=True),
+            )
+            self.session.flush()
+            return reservation  

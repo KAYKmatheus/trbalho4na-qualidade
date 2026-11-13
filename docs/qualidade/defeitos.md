@@ -17,3 +17,75 @@ aplicável.
 O exemplo de `payload` dict gerando `TypeError` não foi incluído: a inspeção do
 histórico disponível não identificou uma correção e um teste associados que
 permitissem confirmá-lo sem inferência.
+
+## DEF-07 — Esgotamento do pool de conexões sob carga
+
+- **Data:** 13/11/2026
+- **Severidade:** Alta
+- **Status:** Aberto
+- **Ambiente:** GitHub Codespaces, FastAPI, PostgreSQL 16 e JMeter 5.6.3
+- **Versão analisada:** `99a6b5a`
+- **Requisito relacionado:** NFR-04 — Desempenho
+
+### Descrição
+
+Durante um teste de carga configurado com 100 usuários
+virtuais, a aplicação apresentou elevada latência e
+respostas HTTP 500 em operações de autenticação,
+pesquisa, criação e aprovação de reservas.
+
+### Resultado observado
+
+- Total de amostras: 956.
+- Amostras com erro: 294.
+- Taxa de erro: 30,75%.
+- Tempo médio: 32.633 ms.
+- Tempo máximo: 122.066 ms.
+
+### Evidência técnica
+
+Os logs registraram a exceção:
+
+`sqlalchemy.exc.TimeoutError: QueuePool limit of size 5
+overflow 10 reached, connection timed out, timeout 30.00`
+
+O erro ocorreu quando as requisições tentaram obter
+conexões do pool SQLAlchemy.
+
+### Causa identificada
+
+Esgotamento do pool de conexões durante a carga.
+
+Ainda não foi determinado se o esgotamento ocorreu
+por dimensionamento insuficiente, transações demoradas
+ou retenção excessiva de conexões.
+
+### Impacto
+
+- Falhas HTTP 500.
+- Aumento significativo do tempo de resposta.
+- Falhas subsequentes de autenticação e operações
+  dependentes do fluxo de reservas.
+- Não atendimento às metas de desempenho.
+
+### Tratamento proposto
+
+1. Revisar o ciclo de vida das sessões SQLAlchemy.
+2. Avaliar duração das transações e consultas.
+3. Verificar a capacidade do PostgreSQL.
+4. Ajustar o dimensionamento do pool, se adequado.
+5. Reexecutar o JMeter e comparar os resultados.
+
+### Critério de encerramento
+
+O defeito somente poderá ser encerrado após uma nova
+execução demonstrar estabilidade, ausência dos erros
+de esgotamento e atendimento às metas de desempenho.
+
+### Evidências relacionadas
+
+- [Relatório de desempenho](./desempenho.md)
+- [Índice de evidências](../evidencias/README.md)
+
+Os arquivos brutos JTL e HTML permanecem locais no
+ambiente usado para a execução.

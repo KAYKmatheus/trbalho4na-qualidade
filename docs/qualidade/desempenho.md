@@ -74,7 +74,85 @@ sobrescritas com `-J`. Não execute carga na produção.
 |---|---|---|---|---|---|---|---|
 | | | | | | | | |
 
-**Status atual:** o plano e o gerador de dados estão preparados; execução do
-JMeter e metas de desempenho **pendentes de validação** em PostgreSQL. Não há
-medições de p95 ou taxa de erro registradas, portanto nenhuma meta foi declarada
-atingida.
+**Status atualizado:** execução realizada em 13/11/2026. As metas de desempenho não foram atendidas. Consulte os resultados detalhados abaixo.
+
+## Execução realizada em 13/11/2026
+
+**Ambiente:** GitHub Codespaces, API FastAPI/Uvicorn,
+PostgreSQL 16 e Apache JMeter 5.6.3 com Java 17.
+
+**Branch:** `feature/ajustes-projeto`
+**Commit:** `99a6b5a`
+
+### Configuração
+
+- Usuários virtuais: 100.
+- Ramp-up: 30 segundos.
+- Duração configurada: 300 segundos.
+- Cenário: autenticação, pesquisa, criação e aprovação de reservas.
+- Ambiente: banco PostgreSQL exclusivo para testes.
+
+### Resultado geral
+
+| Indicador | Resultado |
+|---|---|
+| Total de amostras | 956 |
+| Amostras com erro | 294 |
+| Taxa de erro | 30,75% |
+| Tempo médio | 32.633 ms |
+| Tempo máximo | 122.066 ms |
+| Usuários iniciados | 100 |
+| Usuários finalizados | 100 |
+
+### Resultado por operação
+
+| Operação | Amostras | Erros | p95 |
+|---|---:|---:|---:|
+| Preparar intervalo (processamento local) | 195 | 0 | 21 ms |
+| Login solicitante | 195 | 31 | 85.261 ms |
+| Pesquisar disponibilidade | 171 | 67 | 92.727 ms |
+| Criar reserva restrita | 146 | 72 | 92.033 ms |
+| Login responsável | 135 | 42 | 88.718 ms |
+| Aprovar reserva | 114 | 82 | 119.984 ms |
+
+### Análise dos erros
+
+Os logs da API registraram repetidamente:
+
+`sqlalchemy.exc.TimeoutError: QueuePool limit of size 5
+overflow 10 reached, connection timed out, timeout 30.00`
+
+Isso confirma esgotamento do pool de conexões SQLAlchemy
+durante o teste, provocando erros HTTP 500.
+
+Também foram observadas respostas HTTP 401 e 404 em
+operações posteriores, possivelmente relacionadas a
+falhas nas etapas anteriores do fluxo.
+
+### Conclusão
+
+**Resultado: REPROVADO quanto às metas de desempenho.**
+
+Os valores de p95 excederam os limites definidos
+para pesquisa (2 segundos), criação e aprovação
+(3 segundos).
+
+A execução demonstrou que, nas condições avaliadas,
+a aplicação não sustentou adequadamente a carga
+configurada de 100 usuários.
+
+Recomenda-se investigar gerenciamento de sessões,
+transações e dimensionamento do pool antes de
+executar um novo teste.
+
+### Evidências
+
+- JTL local: `/tmp/alocasenac-jmeter-java17/resultados.jtl`
+- Relatório HTML local:
+  `/tmp/alocasenac-jmeter-java17/relatorio/`
+- Logs da API: erro de esgotamento do QueuePool.
+- Índice: [evidências da entrega](../evidencias/README.md).
+
+Os artefatos locais ainda precisam ser preservados
+fora do ambiente temporário. Não publicar credenciais
+contidas no arquivo `tests/desempenho/reservas.csv`.

@@ -127,3 +127,78 @@ ativos deve permanecer coerente com a constraint do banco.
 - Um resultado só deve ser chamado de aprovado quando houver saída de execução
   guardada; planejamento, testes existentes e execução observada são coisas
   distintas.
+
+## Atualização da entrega — 13/11/2026
+
+Esta seção atualiza os registros históricos apresentados
+anteriormente neste relatório.
+
+### Integração contínua
+
+O workflow GitHub Actions foi executado com sucesso na
+branch `feature/ajustes-projeto`, incluindo os jobs de
+qualidade, contêiner e integração.
+
+A execução correspondente à versão final identificada
+pela tag `v1.0.0-rc1` ainda precisa ser confirmada.
+
+O Quality Gate do SonarCloud não está comprovado como
+aprovado. O workflow permite que a análise estática
+falhe sem reprovar o job.
+
+### Testes e cobertura
+
+O relatório histórico de cobertura Python registra:
+
+- Linhas: 91,36%.
+- Branches: 75,18%.
+
+Esses números pertencem a uma medição anterior e
+não representam automaticamente o commit final.
+
+A execução recente do job de integração no CI foi
+observada como bem-sucedida, mas as evidências
+ainda precisam ser vinculadas ao commit da entrega.
+
+### Desempenho — JMeter
+
+Em 13/11/2026 foi executado um teste de carga com
+100 usuários virtuais, rampa de 30 segundos e
+duração configurada de 300 segundos.
+
+Resultados:
+
+- Total: 956 amostras.
+- Erros: 294 (30,75%).
+- Tempo médio: 32.633 ms.
+- Tempo máximo: 122.066 ms.
+- Metas de desempenho: não atendidas.
+
+Os logs identificaram esgotamento do pool de conexões
+SQLAlchemy durante a carga, causando erros HTTP 500.
+
+O problema foi registrado como DEF-07 e permanece aberto.
+
+Consulte [desempenho](./qualidade/desempenho.md)
+e [defeitos](./qualidade/defeitos.md).
+
+### Pendências da entrega
+
+- Verificar execução em clone limpo.
+- Consolidar evidências de CI e cobertura.
+- Registrar o resultado real do SonarCloud.
+- Concluir o checklist manual CT-34.
+- Atualizar a RTM com as evidências disponíveis.
+- Registrar revisão por pares.
+- Confirmar a decisão de qualidade.
+- Validar e criar a tag `v1.0.0-rc1`.
+
+### Parecer
+
+A versão é candidata à entrega acadêmica com
+ressalvas. A liberação definitiva depende da
+verificação dos requisitos bloqueantes e da
+aprovação do grupo.
+
+Consulte a [decisão de qualidade](./decisao-qualidade.md)
+e o [índice de evidências](./evidencias/README.md).

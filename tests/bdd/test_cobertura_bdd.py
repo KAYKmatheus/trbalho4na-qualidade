@@ -60,6 +60,9 @@ SEM_CENARIO = {
     "tests/bdd/test_delivery_config.py::test_ci_runs_quality_gates_for_pull_requests_and_principal": (
         "Teste de configuração do CI."
     ),
+    "tests/bdd/test_delivery_config.py::test_ci_installs_hash_locked_binary_dependencies": (
+        "Teste de segurança da instalação de dependências no CI."
+    ),
     "tests/bdd/test_delivery_config.py::test_compose_app_waits_for_healthy_postgres_and_docker_context_is_filtered": (
         "Verifica a infraestrutura Docker sem cenário Gherkin próprio."
     ),
@@ -80,6 +83,18 @@ SEM_CENARIO = {
     ),
     "tests/bdd/test_main.py::test_module_entrypoint_starts_uvicorn": (
         "Teste do ponto de entrada da aplicação."
+    ),
+    "tests/bdd/test_relatorios.py::test_report_rejects_naive_period_boundaries": (
+        "Teste unitário da validação de fuso horário do relatório."
+    ),
+    "tests/bdd/test_relatorios.py::test_report_uses_resource_id_when_resource_record_is_missing": (
+        "Teste unitário do fallback para recurso ausente no relatório."
+    ),
+    "tests/bdd/test_relatorios.py::test_responsible_report_includes_only_scoped_resources_and_conflicts": (
+        "Teste unitário do filtro de recursos e conflitos por escopo."
+    ),
+    "tests/bdd/test_relatorios.py::test_responsible_report_with_no_scoped_resources_is_empty": (
+        "Teste unitário de relatório sem recursos no escopo."
     ),
     "tests/test_concorrencia.py::test_postgres_schema_has_exclusion_and_immutable_triggers": (
         "Verificação de esquema e reaplicação de migrações no PostgreSQL."

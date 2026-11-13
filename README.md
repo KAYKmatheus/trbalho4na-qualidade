@@ -55,8 +55,10 @@ horário.
 - O banco `alocasenac_test` do `docker-compose.yml` é reservado aos testes de
   integração (`pytest -m integration`); configure `DATABASE_URL` para apontar
   para ele ao executar esses testes.
-- Instale as dependências pela fonte única em `pyproject.toml` com
-  `pip install -r requirements.txt`.
+- Para desenvolvimento, instale as dependências com
+  `python -m pip install -r requirements.txt`. O CI usa `requirements.lock`,
+  gerado em Linux com Python 3.12 e pip-tools a partir desse arquivo, com
+  versões e hashes fixados; regenere-o nesse ambiente após alterar dependências.
 - Configure `AUTH_SECRET_KEY` com um segredo aleatório fora do repositório.
   O login é feito em `POST /v1/auth/login` com `email` e `password`; envie o
   token retornado como `Authorization: Bearer <token>`. Senhas são armazenadas
@@ -95,3 +97,8 @@ horário.
   informe `SONAR_TOKEN` como nome e cole o token como valor. O workflow executa
   o scan e aguarda o quality gate quando esse segredo estiver disponível; sem
   ele, o scan é ignorado. Nunca publique nem versione o token.
+- **Configurar o PostgreSQL do CI no GitHub:** crie o segredo de repositório
+  `CI_POSTGRES_PASSWORD` em **Settings → Secrets and variables → Actions** com
+  um valor aleatório alfanumérico forte. Os workflows o usam nas URLs de
+  conexão sem imprimi-lo nos logs. Pull requests de forks não recebem segredos
+  do repositório.

@@ -36,11 +36,25 @@ def test_ci_runs_quality_gates_for_pull_requests_and_principal() -> None:
     assert "SONAR_TOKEN" in workflow
     assert "-Dsonar.coverage.exclusions=tests/**" in workflow
     assert "sonar.qualitygate.wait=true" in workflow
+    assert "POSTGRES_PASSWORD: postgres" not in workflow
+    assert "secrets.CI_POSTGRES_PASSWORD" in workflow
+    assert workflow.count("${{ secrets.CI_POSTGRES_PASSWORD }}") == 6
+    assert "postgres:postgres@" not in workflow
     assert "docker build -t alocasenac ." in workflow
     assert "docker inspect --format='{{.State.Health.Status}}'" in workflow
     assert "curl --fail --silent --show-error http://127.0.0.1:8000/v1/health" in workflow
     assert "AUTH_SECRET_KEY: ci-test-secret-key-not-for-production" in workflow
     assert "postgres:" in workflow
+
+
+def test_ci_installs_hash_locked_binary_dependencies() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    lockfile = (ROOT / "requirements.lock").read_text(encoding="utf-8")
+
+    install_command = "python -m pip install --only-binary=:all: --require-hashes -r requirements.lock"
+    assert workflow.count(install_command) == 2
+    assert workflow.count("cache-dependency-path: requirements.lock") == 2
+    assert "--hash=sha256:" in lockfile
 
 
 def test_sonar_properties_do_not_embed_a_token() -> None:

@@ -454,7 +454,7 @@ class ReservationService:
             try:
                 next_status = transition_reservation_status(before_status, target_status)
             except ValidationError as exc:
-                 raise ConflictError(str(exc)) from exc
+                raise ConflictError(str(exc)) from exc
 
             reservation.status = next_status.value
             for item in reservation.items:

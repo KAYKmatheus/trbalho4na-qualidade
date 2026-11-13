@@ -144,10 +144,14 @@ test("login sends credentials, stores the token, and redirects", async () => {
   const message = new FakeElement();
   const { calls, navigation, storage } = loadApp({
     selectors: { "#login-form": form, "#login-error": message },
-    responses: [jsonResponse({ access_token: "issued-token" })],
+    responses: [
+      jsonResponse({ access_token: "issued-token" }),
+      jsonResponse({ id: "user-1", role: "SOLICITANTE" }),
+    ],
   });
 
   assert.equal(await submit(form), true);
+  assert.equal(calls[1].url, "/v1/auth/me");
   assert.equal(calls[0].url, "/v1/auth/login");
   assert.equal(calls[0].options.method, "POST");
   assert.equal(calls[0].options.headers.get("Content-Type"), "application/json");

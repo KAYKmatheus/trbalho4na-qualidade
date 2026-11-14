@@ -59,3 +59,15 @@ Esta versão é uma candidata de release acadêmica.
 A criação da tag, a revisão por pares e a decisão final
 de qualidade serão realizadas após a conferência
 das evidências e do estado do repositório.
+
+## Atualização após o merge — 13/11/2026
+
+- Pull Request #1 integrado à branch principal.
+- GitHub Actions aprovado após o merge.
+- Quality Gate do SonarCloud aprovado no PR #1.
+- 19 testes JavaScript aprovados localmente.
+- Cobertura JavaScript: 96,60% de linhas e 82,53% de branches.
+- Teste JMeter com 100 usuários: 30,75% de erros.
+- Otimização de desempenho planejada para uma etapa posterior.
+
+Evidência: [Validação final de CI](docs/evidencias/validacao-final-ci.md).

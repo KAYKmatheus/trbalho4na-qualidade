@@ -75,8 +75,8 @@ export DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/aloca
 export AUTH_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 export APP_ENV="development"
 
-# 2. Iniciar o banco e conferir se está saudável
-docker compose up -d postgres
+# 2. Iniciar o banco e aguardar ficar saudável
+docker compose up -d --wait postgres
 docker compose ps
 
 # 3. Somente depois de o PostgreSQL estar healthy, iniciar a API
@@ -91,15 +91,15 @@ $env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/aloca
 $env:AUTH_SECRET_KEY = python -c "import secrets; print(secrets.token_urlsafe(32))"
 $env:APP_ENV = "development"
 
-# 2. Iniciar o banco e conferir se está saudável
-docker compose up -d postgres
+# 2. Iniciar o banco e aguardar ficar saudável
+docker compose up -d --wait postgres
 docker compose ps
 
 # 3. Somente depois de o PostgreSQL estar healthy, iniciar a API
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-**Resultado esperado:** contêiner PostgreSQL com status `healthy` e mensagem `Application startup complete.` no terminal da API. A aplicação cria tabelas e aplica as migrações ao iniciar.
+**Resultado esperado:** o comando `docker compose up -d --wait postgres` só retorna quando o PostgreSQL está saudável (`healthy`); depois, o Uvicorn deve exibir `Application startup complete.`. Se `--wait` não for reconhecido pela versão do Docker Compose, atualize o Docker Compose ou espere até `docker compose ps` indicar `healthy` antes de iniciar a API. A aplicação cria tabelas e aplica as migrações ao iniciar.
 
 **Importante:** mantenha a API rodando nesse terminal. Cada terminal tem variáveis de ambiente próprias: no próximo passo, configure a URL novamente no segundo terminal.
 

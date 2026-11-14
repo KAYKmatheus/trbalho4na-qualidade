@@ -202,3 +202,61 @@ aprovação do grupo.
 
 Consulte a [decisão de qualidade](./decisao-qualidade.md)
 e o [índice de evidências](./evidencias/README.md).
+
+---
+
+## Atualização após o merge — 13/11/2026
+
+Esta seção substitui as informações anteriores sobre
+pendências de CI e SonarCloud.
+
+### Integração e qualidade aprovadas
+
+- Pull Request #1 integrado à branch `principal`.
+- Commit de merge: `9432ac1`.
+- GitHub Actions aprovado após o merge.
+- Jobs aprovados: Quality, Integration e Container.
+- Quality Gate do SonarCloud aprovado no PR #1.
+
+Evidência:
+[Validação final de CI](./evidencias/validacao-final-ci.md).
+
+### Testes JavaScript
+
+Na validação local mais recente:
+
+- 19 testes aprovados.
+- Cobertura de linhas: 96,60%.
+- Cobertura de branches: 82,53%.
+
+Esses números representam a medição local dos
+arquivos JavaScript, não a cobertura global Python.
+
+### Ressalva de desempenho
+
+O teste JMeter de 13/11/2026 registrou:
+
+- 100 usuários virtuais.
+- 956 amostras.
+- 294 erros (30,75%).
+
+As metas de desempenho não foram atendidas.
+
+O problema de esgotamento do pool de conexões
+SQLAlchemy permanece como limitação conhecida.
+
+A otimização será avaliada em uma etapa posterior,
+sem impedir o registro da versão acadêmica
+com essa ressalva.
+
+### Situação da versão
+
+A versão candidata `v1.0.0-rc1` possui CI e
+SonarCloud aprovados.
+
+Permanecem pendentes a validação manual CT-34,
+a revisão por pares e o tratamento do problema
+de desempenho.
+
+A criação da tag será realizada após a
+consolidação da documentação.

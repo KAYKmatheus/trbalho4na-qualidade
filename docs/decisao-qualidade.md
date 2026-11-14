@@ -115,3 +115,39 @@ ou integridade de reservas, a decisão deverá ser BLOQUEAR.
 
 A decisão definitiva será registrada após a revisão
 das evidências e a aprovação dos integrantes.
+
+---
+
+## Atualização após o merge — 13/11/2026
+
+### Qualidade e integração
+
+- Pull Request #1 integrado à branch `principal`.
+- GitHub Actions aprovado após o merge.
+- Quality Gate do SonarCloud aprovado no PR #1.
+- 19 testes JavaScript aprovados localmente.
+- Cobertura JavaScript de linhas: 96,60%.
+- Cobertura JavaScript de branches: 82,53%.
+
+Evidência: [Validação final de CI](./evidencias/validacao-final-ci.md).
+
+### Risco de desempenho
+
+O teste JMeter com 100 usuários registrou
+294 erros em 956 amostras (30,75%).
+
+O problema de esgotamento do pool SQLAlchemy
+permanece aberto.
+
+### Parecer atualizado
+
+Recomenda-se a liberação da versão candidata
+`v1.0.0-rc1` para avaliação acadêmica,
+com ressalva explícita de desempenho.
+
+Esta recomendação não significa que as metas
+de desempenho tenham sido atendidas.
+
+A aprovação definitiva permanece condicionada
+à revisão do grupo e à conferência dos requisitos
+obrigatórios da entrega.

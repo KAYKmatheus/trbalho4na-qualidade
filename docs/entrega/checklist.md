@@ -79,3 +79,22 @@ Referências: `docs/qualidade/RTM.md` e
 A entrega só será considerada finalizada após a conferência
 dos itens obrigatórios, registro das ressalvas, validação
 da versão candidata e criação da tag correspondente.
+
+---
+
+## Atualização após o merge — 13/11/2026
+
+- [x] Pull Request #1 integrado à `principal`.
+- [x] GitHub Actions aprovado no commit de merge `9432ac1`.
+- [x] Jobs Quality, Integration e Container aprovados.
+- [x] Quality Gate do SonarCloud aprovado no PR #1.
+- [x] Evidências de CI registradas.
+- [x] Resultado do JMeter documentado: 30,75% de erros.
+- [ ] Finalizar validação manual CT-34.
+- [ ] Registrar revisão por pares.
+- [ ] Criar a tag `v1.0.0-rc1` após integrar a documentação.
+
+Evidências: [Validação final de CI](../evidencias/validacao-final-ci.md).
+
+O resultado do JMeter permanece como limitação conhecida.
+A otimização será realizada posteriormente, em branch separada.

@@ -395,3 +395,76 @@ test("administrador cadastra usuarios recursos e vincula responsaveis", async ()
     "Responsável vinculado com sucesso!"
   );
 });
+
+test("administrador cadastra professor e material com campos desativados", async () => {
+  const page = createPage(
+    "ADMIN",
+    { name: "Administrador", role: "ADMIN" },
+    async (url, options) => {
+      if (options.method === "POST") return { id: "novo-recurso" };
+      return [];
+    }
+  );
+
+  await settle();
+
+  const formulario = page.get("#form-recurso");
+  const tipo = page.get("#recurso-tipo");
+
+  // FormData real não inclui campos disabled: professor não envia categoria/localização.
+  tipo.value = "professor";
+  await trigger(tipo, "change");
+  assert.equal(page.get("#recurso-categoria").disabled, true);
+  assert.equal(page.get("#recurso-localizacao").disabled, true);
+
+  formulario.values = {
+    resource_type: "professor",
+    name: "Professor de Matemática",
+    restricted: "false",
+  };
+
+  await trigger(formulario);
+
+  // Material não envia a localização desativada, mas exige categoria e quantidade.
+  tipo.value = "material";
+  await trigger(tipo, "change");
+  assert.equal(page.get("#recurso-localizacao").disabled, true);
+  assert.equal(page.get("#recurso-quantidade").disabled, false);
+
+  formulario.values = {
+    resource_type: "material",
+    name: "Projetor",
+    category: "audiovisual",
+    quantity_total: "5",
+    restricted: "true",
+  };
+
+  await trigger(formulario);
+
+  const cadastros = page.calls
+    .filter(call => call.url === "/v1/admin/resources" && call.options.method === "POST")
+    .map(call => JSON.parse(call.options.body));
+
+  assert.deepEqual(cadastros, [
+    {
+      resource_type: "professor",
+      name: "Professor de Matemática",
+      restricted: false,
+      category: null,
+      location: null,
+    },
+    {
+      resource_type: "material",
+      name: "Projetor",
+      restricted: true,
+      category: "audiovisual",
+      location: null,
+      quantity_total: 5,
+    },
+  ]);
+
+  assert.equal(
+    page.get("#recurso-mensagem").textContent,
+    "Recurso cadastrado com sucesso!"
+  );
+});

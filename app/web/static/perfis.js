@@ -323,8 +323,8 @@ function iniciarAdministrador() {
       resource_type: dados.resource_type,
       name: dados.name.trim(),
       restricted: dados.restricted === "true",
-      category: dados.category.trim() || null,
-      location: dados.location.trim() || null,
+      category: dados.category?.trim() || null,
+      location: dados.location?.trim() || null,
     };
 
     if (dados.resource_type === "sala" && dados.capacity) {

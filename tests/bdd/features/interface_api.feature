@@ -12,7 +12,7 @@ Funcionalidade: Interface e documentação da API
     Então a mensagem é compreensível e nunca apresenta a operação como sucesso
 
   # Equivale a: CT-34
-  # Teste: tests/bdd/test_interface_api.py::test_ct34_dashboard_has_responsive_and_keyboard_navigation_basics
+  # Teste: tests/bdd/test_web_static.py::test_static_pages_are_served_with_html_and_health_remains_available
   Cenário: Usar os fluxos principais em diferentes larguras e somente pelo teclado
     Dado que os fluxos principais são testados entre 360 e 1920 pixels
     Quando uma pessoa os executa usando apenas o teclado

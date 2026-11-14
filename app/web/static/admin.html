@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Administrador — AlocaSenac</title>
+  <link rel="stylesheet" href="/app/estilo.css">
+  <script src="/app/app.js" defer></script>
+  <script src="/app/perfis.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/app/admin.html">AlocaSenac</a>
+    <nav aria-label="Menu do Administrador">
+      <a href="/app/admin.html" aria-current="page">Administração</a>
+      <button type="button" data-logout>Sair</button>
+    </nav>
+  </header>
+
+  <main class="container" data-role-page="ADMIN">
+    <h1>Administração</h1>
+    <p>Gerencie os usuários e recursos do AlocaSenac.</p>
+
+    <section class="panel">
+      <h2>Cadastrar usuário</h2>
+      <div id="cadastro-usuarios"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Cadastrar recurso</h2>
+      <div id="cadastro-recursos"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Atribuir recurso ao Responsável</h2>
+      <p>Escolha quem poderá aprovar solicitações de cada recurso.</p>
+
+      <form id="form-vinculo" class="form-admin">
+        <label for="vinculo-responsavel">Responsável</label>
+        <select id="vinculo-responsavel" required></select>
+
+        <label for="vinculo-recurso">Recurso</label>
+        <select id="vinculo-recurso" required></select>
+
+        <button type="submit">Vincular responsável</button>
+        <p id="vinculo-mensagem" role="status"></p>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Recursos cadastrados</h2>
+      <div id="lista-recursos"></div>
+    </section>
+  </main>
+</body>
+</html>

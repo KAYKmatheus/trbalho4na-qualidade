@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from datetime import date
 from pathlib import Path
 
@@ -14,7 +15,21 @@ COVERAGE_FILE = ROOT / "coverage.json"
 REPORT_FILE = ROOT / "docs" / "qualidade" / "relatorio-cobertura.md"
 LINE_TARGET = 80.0
 BRANCH_TARGET = 70.0
-COMMAND = "pytest --cov=app --cov-branch --cov-report=json:coverage.json"
+COMMAND = (
+    'py -m pytest -o addopts="" --cov=app --cov-branch '
+    "--cov-report=term-missing --cov-report=json:coverage.json"
+)
+
+
+def _reference_commit() -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
 
 
 def _percentage(covered: int, total: int) -> float:
@@ -90,6 +105,7 @@ def build_report(data: dict) -> str:
     return f"""# Relatório de cobertura
 
 - Data: {date.today().isoformat()}
+- Commit-base: `{_reference_commit()}` (medição feita na árvore de trabalho atual).
 - Comando: `{COMMAND}`
 - Linhas: {line_result}
 - Ramos: {branch_result}
@@ -117,7 +133,7 @@ Na raiz do repositório, gere os dados e o relatório:
 
 ```text
 {COMMAND}
-python tests/bdd/gerar_relatorio.py
+py -m tests.bdd.gerar_relatorio
 ```
 """
 

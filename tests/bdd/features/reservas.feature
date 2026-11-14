@@ -12,7 +12,7 @@ Funcionalidade: Solicitação e manutenção de reservas
     Então a reserva é registrada com o Solicitante, o intervalo e o recurso
 
   # Equivale a: CT-11
-  # Teste: tests/bdd/test_cenarios_executaveis.py::test_recusar_reserva_sem_dados_obrigatórios_ou_com_intervalo_inválido, tests/bdd/test_api_errors.py::test_ct11_reservation_validation_reports_invalid_field
+  # Teste: tests/bdd/test_cenarios_executaveis.py::test_recusar_reserva_sem_dados_obrigatórios_ou_com_intervalo_inválido, tests/bdd/test_api_errors.py::test_ct11_reservation_validation_reports_invalid_field, tests/test_reservas.py::test_reservation_item_parser_rejects_invalid_input, tests/test_reservas.py::test_reservation_item_parser_accepts_and_normalizes_datetimes
   Cenário: Recusar reserva sem dados obrigatórios ou com intervalo inválido
     Dado que a reserva não contém recurso ou finalidade, ou tem início maior ou igual ao fim
     Quando o Solicitante envia a reserva

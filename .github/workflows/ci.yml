@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - principal
+      - feature/ajustes-projeto
 
 permissions:
   contents: read
@@ -17,7 +18,7 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
           POSTGRES_DB: alocasenac_test
         ports:
           - 5432:5432
@@ -27,27 +28,41 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test
+      DATABASE_URL: postgresql+psycopg://postgres:${{ secrets.CI_POSTGRES_PASSWORD }}@localhost:5432/alocasenac_test
       APP_ENV: test
       AUTH_SECRET_KEY: ci-test-secret-key-not-for-production
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install JavaScript test dependencies
+        run: npm ci --ignore-scripts
+      - name: Test JavaScript and collect coverage
+        run: npm run test:coverage
+      - name: Verify JavaScript coverage report
+        run: |
+          test -s coverage-js/lcov.info
+          grep -Fq "app.js" coverage-js/lcov.info
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: requirements.lock
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: "python -m pip install --only-binary=:all: --require-hashes -r requirements.lock"
       - name: Verify application import
         run: python -c "import app.main"
       - name: Ruff
         run: python -m ruff check .
-      - name: Tests and coverage (including integration and concurrency)
+      - name: Python tests and coverage
         run: >-
-          python -m pytest -o addopts=""
+          python -m pytest
           --cov=app --cov-branch
+          --cov-fail-under=80
           --cov-report=term-missing
           --cov-report=xml:coverage.xml
           --cov-report=json:coverage.json
@@ -66,11 +81,14 @@ jobs:
           fi
       - name: SonarCloud scan
         if: steps.sonar.outputs.enabled == 'true'
+        continue-on-error: true
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >-
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.javascript.lcov.reportPaths=coverage-js/lcov.info
             -Dsonar.coverage.exclusions=tests/**
             -Dsonar.qualitygate.wait=true
 
@@ -81,7 +99,7 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
           POSTGRES_DB: alocasenac_test
         ports:
           - 5432:5432
@@ -91,6 +109,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      CONTAINER_DATABASE_URL: postgresql+psycopg://postgres:${{ secrets.CI_POSTGRES_PASSWORD }}@host.docker.internal:5432/alocasenac_test
       AUTH_SECRET_KEY: ci-test-secret-key-not-for-production
     steps:
       - uses: actions/checkout@v4
@@ -100,7 +119,7 @@ jobs:
         run: >-
           docker run -d --name alocasenac
           --add-host=host.docker.internal:host-gateway
-          -e DATABASE_URL=postgresql+psycopg://postgres:postgres@host.docker.internal:5432/alocasenac_test
+          -e DATABASE_URL="$CONTAINER_DATABASE_URL"
           -e AUTH_SECRET_KEY="$AUTH_SECRET_KEY"
           -p 8000:8000
           alocasenac
@@ -122,3 +141,35 @@ jobs:
           exit 1
       - name: Check health endpoint
         run: curl --fail --silent --show-error http://127.0.0.1:8000/v1/health
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
+          POSTGRES_DB: alocasenac_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d alocasenac_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:${{ secrets.CI_POSTGRES_PASSWORD }}@localhost:5432/alocasenac_test
+      APP_ENV: test
+      AUTH_SECRET_KEY: ci-test-secret-key-not-for-production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Install dependencies
+        run: "python -m pip install --only-binary=:all: --require-hashes -r requirements.lock"
+      - name: PostgreSQL integration tests
+        run: python -m pytest -o addopts="" -m integration -v

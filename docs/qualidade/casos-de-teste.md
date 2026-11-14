@@ -61,11 +61,15 @@ quando houver evidência correspondente em `docs/qualidade/evidencias/`.
 | CT-09 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-10 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-11 | 2026-11-11 | Local | Parcial — payload inválido; critérios de campo não cobertos integralmente | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-12 | 2026-11-12 | Local | Pendente de execução — integração PostgreSQL indisponível (`DATABASE_URL` não definida e Docker CLI ausente) | — | — |
 | CT-13 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-14 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
-| CT-15 | 2026-11-11 | Local | Parcial — conflito verificado no serviço, não pelo código HTTP da rota | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
-| CT-18 | 2026-11-11 | Local | Parcial — regra de saldo unitária, sem fluxo de reserva | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
-| CT-20 | 2026-11-11 | Local | Parcial — regra unitária de saldo; disputa concorrente não executada | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-15 | 2026-11-12 | Local | Pendente de execução — validação da restrição PostgreSQL indisponível; evidência local anterior é parcial | [validação local parcial](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-16 | 2026-11-12 | Local | Pendente de execução — integração PostgreSQL indisponível (`DATABASE_URL` não definida e Docker CLI ausente) | — | — |
+| CT-17 | 2026-11-12 | Local | Pendente de execução — integração PostgreSQL indisponível (`DATABASE_URL` não definida e Docker CLI ausente) | — | — |
+| CT-18 | 2026-11-12 | Local | Pendente de execução — validação de estoque no PostgreSQL indisponível; evidência local anterior é parcial | [validação local parcial](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-19 | 2026-11-12 | Local | Pendente de execução — teste concorrente PostgreSQL indisponível (`DATABASE_URL` não definida e Docker CLI ausente) | — | — |
+| CT-20 | 2026-11-12 | Local | Pendente de execução — teste concorrente de estoque PostgreSQL indisponível; evidência local anterior é parcial | [validação local parcial](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-21 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-22 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-23 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
@@ -74,6 +78,7 @@ quando houver evidência correspondente em `docs/qualidade/evidencias/`.
 | CT-26 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-27 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-28 | 2026-11-11 | Local | Parcial — criação auditada; ciclo completo não verificado neste teste | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-29 | 2026-11-12 | Local | Pendente de execução — gatilhos de imutabilidade PostgreSQL indisponíveis (`DATABASE_URL` não definida e Docker CLI ausente) | — | — |
 | CT-30 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-31 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-32 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
@@ -82,6 +87,6 @@ quando houver evidência correspondente em `docs/qualidade/evidencias/`.
 | CT-35 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-36 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-37 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
-| CT-38 | 2026-11-11 | Local | Parcial — evento verificado para conflito de sala; demais causas pendentes | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
+| CT-38 | 2026-11-12 | Local | Pendente de execução — integração PostgreSQL indisponível; evidência local anterior cobre apenas parte dos conflitos | [validação local parcial](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-39 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |
 | CT-40 | 2026-11-11 | Local | Aprovado | [validação local](./evidencias/validacao-limpeza-2026-11-11.txt) | — |

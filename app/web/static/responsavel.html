@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Responsável — AlocaSenac</title>
+  <link rel="stylesheet" href="/app/estilo.css">
+  <script src="/app/app.js" defer></script>
+  <script src="/app/perfis.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/app/responsavel.html">AlocaSenac</a>
+    <nav aria-label="Menu do Responsável">
+      <a href="/app/responsavel.html" aria-current="page">Aprovações</a>
+      <button type="button" data-logout>Sair</button>
+    </nav>
+  </header>
+
+  <main class="container" data-role-page="RESPONSAVEL">
+    <h1>Solicitações pendentes</h1>
+    <p>Consulte e decida sobre reservas de recursos sob sua responsabilidade.</p>
+
+    <section class="panel">
+      <h2>Reservas aguardando aprovação</h2>
+      <p id="responsavel-message" role="status">
+        Carregando solicitações...
+      </p>
+      <div id="lista-pendencias"></div>
+    </section>
+  </main>
+</body>
+</html>

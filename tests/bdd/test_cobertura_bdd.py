@@ -12,6 +12,21 @@ ROOT = Path(__file__).resolve().parents[2]
 TESTS_DIR = ROOT / "tests"
 
 SEM_CENARIO = {
+    "tests/bdd/test_perfis_paineis.py::test_solicitante_nao_pode_listar_usuarios": (
+        "Teste de segurança da nova rota administrativa: Solicitante recebe 403."
+    ),
+    "tests/bdd/test_perfis_paineis.py::test_responsavel_nao_pode_listar_usuarios": (
+        "Teste de segurança da nova rota administrativa: Responsável recebe 403."
+    ),
+    "tests/bdd/test_perfis_paineis.py::test_admin_lista_usuarios_sem_expor_senhas": (
+        "Teste de contrato da listagem administrativa sem exposição de credenciais."
+    ),
+    "tests/bdd/test_perfis_paineis.py::test_solicitante_nao_pode_consultar_pendencias": (
+        "Teste de autorização da nova rota de pendências do Responsável."
+    ),
+    "tests/bdd/test_perfis_paineis.py::test_responsavel_ve_apenas_pendencias_do_seu_escopo": (
+        "Teste de isolamento das solicitações pelo escopo de recursos do Responsável."
+    ),
     "tests/bdd/test_api_errors.py::test_admin_resource_and_scope_errors_are_explicit": (
         "Teste de erros transversais da API sem cenário Gherkin próprio."
     ),
@@ -60,6 +75,12 @@ SEM_CENARIO = {
     "tests/bdd/test_delivery_config.py::test_ci_runs_quality_gates_for_pull_requests_and_principal": (
         "Teste de configuração do CI."
     ),
+    "tests/bdd/test_delivery_config.py::test_ci_installs_hash_locked_binary_dependencies": (
+        "Teste de segurança da instalação de dependências no CI."
+    ),
+    "tests/bdd/test_delivery_config.py::test_compose_app_waits_for_healthy_postgres_and_docker_context_is_filtered": (
+        "Verifica a infraestrutura Docker sem cenário Gherkin próprio."
+    ),
     "tests/bdd/test_delivery_config.py::test_sonar_properties_do_not_embed_a_token": (
         "Teste de configuração do Sonar."
     ),
@@ -78,6 +99,18 @@ SEM_CENARIO = {
     "tests/bdd/test_main.py::test_module_entrypoint_starts_uvicorn": (
         "Teste do ponto de entrada da aplicação."
     ),
+    "tests/bdd/test_relatorios.py::test_report_rejects_naive_period_boundaries": (
+        "Teste unitário da validação de fuso horário do relatório."
+    ),
+    "tests/bdd/test_relatorios.py::test_report_uses_resource_id_when_resource_record_is_missing": (
+        "Teste unitário do fallback para recurso ausente no relatório."
+    ),
+    "tests/bdd/test_relatorios.py::test_responsible_report_includes_only_scoped_resources_and_conflicts": (
+        "Teste unitário do filtro de recursos e conflitos por escopo."
+    ),
+    "tests/bdd/test_relatorios.py::test_responsible_report_with_no_scoped_resources_is_empty": (
+        "Teste unitário de relatório sem recursos no escopo."
+    ),
     "tests/test_concorrencia.py::test_postgres_schema_has_exclusion_and_immutable_triggers": (
         "Verificação de esquema e reaplicação de migrações no PostgreSQL."
     ),
@@ -93,8 +126,44 @@ SEM_CENARIO = {
     "tests/test_regras_dominio.py::test_final_reservation_status_cannot_transition": (
         "Teste unitário de estado final."
     ),
-    "tests/test_reservas.py::test_home_page_renders_reservation_dashboard": (
-        "Teste de renderização da página inicial."
+    "tests/test_regras_dominio.py::test_invalid_interval_is_rejected": (
+        "Teste unitário da validação de intervalos inválidos."
+    ),
+    "tests/test_reservation_em_uso.py::test_cannot_cancel_reservation_in_use_over_http": (
+        "Teste de transição HTTP de EM_USO para cancelamento, sem cenário Gherkin próprio."
+    ),
+    (
+        "tests/test_reservation_em_uso.py::"
+        "test_in_use_reservation_rejects_all_transitions_except_completion_over_http"
+    ): (
+        "Teste parametrizado das transições proibidas a partir de EM_USO."
+    ),
+    "tests/test_reservation_em_uso.py::test_in_use_reservation_can_be_completed_over_http": (
+        "Teste de conclusão HTTP de uma reserva EM_USO."
+    ),
+    (
+        "tests/test_global_errors.py::"
+        "test_unexpected_error_returns_generic_json_without_internal_details"
+    ): (
+        "Teste de contrato do handler global para erros inesperados."
+    ),
+    "tests/e2e/test_fluxo_completo.py::test_full_reservation_flow_uses_http_only": (
+        "Fluxo ponta a ponta sem cenário Gherkin próprio."
+    ),
+    "tests/e2e/test_fluxo_completo.py::test_overlapping_room_reservation_is_rejected_over_http": (
+        "Conflito ponta a ponta sem cenário Gherkin próprio."
+    ),
+    "tests/bdd/test_api_errors.py::test_nonexistent_resource_routes_return_not_found": (
+        "Teste parametrizado de rotas administrativas com recurso inexistente."
+    ),
+    "tests/test_reservation_listing.py::test_requester_lists_only_their_own_reservations_over_http": (
+        "Teste de isolamento da listagem de reservas do solicitante."
+    ),
+    "tests/bdd/test_web_static.py::test_static_pages_are_served_with_html_and_health_remains_available": (
+        "Verifica a entrega das páginas web estáticas e a saúde da API."
+    ),
+    "tests/bdd/test_web_static.py::test_root_redirects_to_static_login_page": (
+        "Verifica o redirecionamento da raiz para a interface web."
     ),
 }
 

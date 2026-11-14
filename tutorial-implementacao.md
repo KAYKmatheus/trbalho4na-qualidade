@@ -275,31 +275,72 @@ O CI da `principal` foi aprovado para a versão `v1.0.0-rc1`; o Quality Gate do 
 
 ## Passo 12 — Executar JMeter (opcional, teste de carga)
 
-**Não é necessário executar o JMeter para abrir e demonstrar o AlocaSenac.** O teste existente com 100 usuários registrou 30,75% de erros; portanto, as metas de desempenho **não foram atingidas**.
+**Não é necessário executar JMeter para usar ou demonstrar o AlocaSenac.** Em execução anterior com 100 usuários, foram registrados 30,75% de erros; as metas de desempenho não foram atingidas.
 
-**Pré-requisito obrigatório:** o Apache JMeter não é instalado com as dependências Python e normalmente não vem no Codespaces. Instale JMeter 5.6.3 (download oficial: https://jmeter.apache.org/download_jmeter.cgi) e Java 17, confira `java -version` e `jmeter --version` antes de executar os comandos abaixo. Em Codespaces/Linux, extraia o pacote oficial e utilize o caminho completo, por exemplo `/tmp/apache-jmeter-5.6.3/bin/jmeter` no lugar de `jmeter` se não estiver no PATH. No Windows, execute `C:\\ferramentas\\apache-jmeter-5.6.3\\bin\\jmeter.bat` (ajustando para a pasta em que o programa foi extraído). Consulte a página oficial para verificar o checksum do download.
+Execute a partir da **raiz do repositório**, com PostgreSQL de teste disponível e o Uvicorn rodando na porta 8000 em outro terminal. O Apache JMeter não faz parte da instalação Python e **não vem necessariamente instalado no Codespaces**.
 
-**Correção do erro `ModuleNotFoundError: No module named 'app'`:** execute o preparo como módulo a partir da raiz do repositório, usando `python -m tests.desempenho.preparar_dados`. Confirme que o preparo terminou e que `tests/desempenho/reservas.csv` foi gerado **antes** de iniciar o JMeter.
+### Codespaces — Bash
 
-Primeiro, prepare dados específicos do cenário no banco de teste:
+**1. Verificar Java e instalar JMeter 5.6.3:**
 
-**Codespaces — Bash:**
+```bash
+java -version
+curl -fL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz -o /tmp/apache-jmeter-5.6.3.tgz
+tar -xzf /tmp/apache-jmeter-5.6.3.tgz -C /tmp
+/tmp/apache-jmeter-5.6.3/bin/jmeter --version
+```
+
+Se `java -version` falhar, instale Java 17 antes de continuar. Para uma instalação verificada, confira também o checksum SHA-512 do pacote na [distribuição oficial do JMeter](https://jmeter.apache.org/download_jmeter.cgi) antes de extrair.
+
+**2. Preparar os dados de teste (uma vez):**
 
 ```bash
 export DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
 python -m tests.desempenho.preparar_dados
-jmeter -n -t tests/desempenho/reservas.jmx -Jhost=localhost -Jport=8000 -Jthreads=100 -Jrampup=30 -Jduration=300 -JdataFile=tests/desempenho/reservas.csv -l tests/desempenho/resultados.jtl -e -o tests/desempenho/relatorio-jmeter
 ```
 
-**VS Code — PowerShell:**
+Essa execução deve gerar `tests/desempenho/reservas.csv`. **Se a preparação já informou que criou 100 solicitantes, 100 responsáveis, 100 salas e o CSV, não repita essa etapa**: avance para o teste.
+
+**3. Executar o teste com o JMeter instalado:**
+
+```bash
+/tmp/apache-jmeter-5.6.3/bin/jmeter -n \
+  -t tests/desempenho/reservas.jmx \
+  -Jhost=localhost -Jport=8000 \
+  -Jthreads=100 -Jrampup=30 -Jduration=300 \
+  -JdataFile=tests/desempenho/reservas.csv \
+  -l tests/desempenho/resultados.jtl \
+  -e -o tests/desempenho/relatorio-jmeter
+```
+
+Use novos caminhos para o arquivo JTL e a pasta HTML ao repetir o teste: o diretório de relatório do JMeter deve estar vazio ou não existir.
+
+### VS Code local — Windows PowerShell
+
+**1.** Instale Java 17 e o [JMeter 5.6.3](https://jmeter.apache.org/download_jmeter.cgi). Extraia o ZIP, por exemplo, em `C:\ferramentas\apache-jmeter-5.6.3` (ajuste o caminho conforme seu computador). Confira a integridade do download e execute:
 
 ```powershell
-$env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
-python -m tests.desempenho.preparar_dados
-jmeter -n -t tests\desempenho\reservas.jmx -Jhost=localhost -Jport=8000 -Jthreads=100 -Jrampup=30 -Jduration=300 -JdataFile=tests\desempenho\reservas.csv -l tests\desempenho\resultados.jtl -e -o tests\desempenho\relatorio-jmeter
+java -version
+$jmeter = 'C:\ferramentas\apache-jmeter-5.6.3\bin\jmeter.bat'
+& $jmeter --version
 ```
 
-Requer Apache JMeter instalado (5.6.3+) e Java 17. Para novas execuções, escolha nomes diferentes para o arquivo JTL e o diretório HTML, pois o JMeter não aceita reutilizar uma pasta de relatório já preenchida. **Nunca execute carga contra produção.** O CSV contém credenciais de teste e não deve ser versionado. Consulte [plano e resultados](./docs/qualidade/desempenho.md).
+**2.** Prepare os dados de teste se ainda não tiver gerado o CSV:
+
+```powershell
+$env:DATABASE_URL = 'postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test'
+python -m tests.desempenho.preparar_dados
+```
+
+**3.** Execute o teste:
+
+```powershell
+& $jmeter -n -t tests\desempenho\reservas.jmx -Jhost=localhost -Jport=8000 -Jthreads=100 -Jrampup=30 -Jduration=300 -JdataFile=tests\desempenho\reservas.csv -l tests\desempenho\resultados.jtl -e -o tests\desempenho\relatorio-jmeter
+```
+
+**Erros comuns:** `ModuleNotFoundError: No module named 'app'` → executar `python -m tests.desempenho.preparar_dados` na raiz do projeto; `jmeter: command not found` → instalar JMeter e utilizar o caminho completo até o executável; pasta de relatório preenchida → escolher outro diretório de saída.
+
+**Segurança:** nunca executar carga em produção. O CSV contém credenciais de teste e não deve ser versionado ou compartilhado. Consulte [plano e resultados](./docs/qualidade/desempenho.md).
 
 ## Passo 13 — Encerrar o ambiente de demonstração
 

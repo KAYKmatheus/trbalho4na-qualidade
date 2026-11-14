@@ -1,263 +1,329 @@
-# Tutorial de implementação — AlocaSenac
+# Tutorial completo — AlocaSenac
 
-Este é o tutorial principal da implementação. Os comandos abaixo descrevem
-como reproduzir as etapas; “resultado esperado” não significa que a etapa foi
-executada neste ambiente. Para os resultados observados, consulte os arquivos
-de evidência indicados em cada etapa e no [relatório final](./docs/relatorio-final.md).
+Guia de instalação, execução, demonstração e testes. **Todos os passos têm instruções para GitHub Codespaces (Bash/Linux) e para VS Code local no Windows (PowerShell).** Execute somente o bloco correspondente ao seu ambiente, sempre na raiz do repositório.
 
-## Passo 1 — Preparar o ambiente
+> **Versão de referência:** `v1.0.0-rc1`. Os comandos abaixo são instruções de reprodução; a instalação limpa deve ser validada pelo grupo. O desempenho com 100 usuários ainda possui ressalva documentada em [desempenho](./docs/qualidade/desempenho.md).
 
-**Comando (PowerShell, na raiz do repositório):**
+## Passo 0 — Pré-requisitos e clone
+
+| Codespaces / Linux | VS Code local / Windows |
+|---|---|
+| Codespace criado no repositório; terminal **Bash** | Git, VS Code, Python 3.12 e Docker Desktop instalado e aberto |
+| Docker CLI e daemon disponíveis no Codespace | Docker Desktop com contêineres Linux ativos |
+| O repositório já costuma estar clonado | É necessário clonar e abrir a pasta |
+
+**Codespaces — Bash:** abra um Codespace na branch `principal` e confira:
+
+```bash
+pwd
+git branch --show-current
+docker --version
+docker compose version
+docker info
+python --version
+```
+
+**VS Code — PowerShell:** abra o terminal integrado (`Terminal > New Terminal`) e execute:
+
+```powershell
+git clone https://github.com/KAYKmatheus/trbalho4na-qualidade.git
+cd trbalho4na-qualidade
+git branch --show-current
+docker --version
+docker compose version
+docker info
+py -3.12 --version
+```
+
+**Resultado esperado:** repositório na `principal` e Docker respondendo sem erro de conexão com o daemon. Se `docker info` falhar, **pare aqui**: inicie o Docker Desktop (Windows) ou verifique a disponibilidade do Docker no Codespace. Não adianta iniciar a API sem PostgreSQL.
+
+## Passo 1 — Criar ambiente Python e instalar dependências
+
+**Codespaces — Bash:**
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python --version
+```
+
+**VS Code — PowerShell:**
 
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
+python --version
 ```
 
-**Arquivos:** `pyproject.toml`, `requirements.txt`, `.env.example`.
+Caso a política do PowerShell bloqueie `Activate.ps1`, execute `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` **somente nesse terminal** e tente ativar novamente. Outra opção é chamar diretamente `.\.venv\Scripts\python.exe`.
 
-**Resultado esperado:** ambiente virtual com as dependências do projeto. O
-repositório requer Python 3.11 ou superior e o workflow configura Python 3.12;
-uma execução do CI ainda aguarda Pull Request, conforme
-[evidências](./docs/qualidade/evidencias/README.md).
+**Resultado esperado:** dependências instaladas no ambiente virtual. Python 3.12 é a versão usada no CI; o projeto exige pelo menos Python 3.11.
 
-## Passo 2 — Subir PostgreSQL e aplicar migrações
+## Passo 2 — Iniciar o PostgreSQL, configurar variáveis e migrar o banco
 
-Configure `AUTH_SECRET_KEY` no ambiente local e inicie o banco:
+O arquivo `docker-compose.yml` cria um PostgreSQL de demonstração chamado `alocasenac_test`. Neste tutorial, a API é executada **fora** do contêiner, no terminal do VS Code/Codespaces; por isso a URL aponta para `localhost:5432`.
+
+**Codespaces — Bash (terminal 1):**
+
+```bash
+docker compose up -d postgres
+docker compose ps
+export DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
+export AUTH_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export APP_ENV="development"
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**VS Code — PowerShell (terminal 1):**
+
+```powershell
+docker compose up -d postgres
+docker compose ps
+$env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
+$env:AUTH_SECRET_KEY = py -3.12 -c "import secrets; print(secrets.token_urlsafe(32))"
+$env:APP_ENV = "development"
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+**Resultado esperado:** contêiner PostgreSQL com status `healthy` e mensagem `Application startup complete.` no terminal da API. A aplicação cria tabelas e aplica as migrações ao iniciar.
+
+**Importante:** mantenha a API rodando nesse terminal. Cada terminal tem variáveis de ambiente próprias: no próximo passo, configure a URL novamente no segundo terminal.
+
+**Se aparecer `Connection refused` na porta 5432:** o PostgreSQL não iniciou ou não está acessível. Verifique `docker compose ps` e `docker compose logs postgres`. Não tente resolver alterando a API.
+
+**Se a porta 5432 estiver ocupada:** identifique a outra instância de PostgreSQL antes de alterar portas. Não exclua volumes nem bancos sem conferir seu conteúdo.
+
+## Passo 3 — Conferir API e abrir a interface
+
+Abra **outro terminal** e mantenha o terminal 1 com o Uvicorn ativo.
+
+**Codespaces — Bash (terminal 2):**
+
+```bash
+curl -i http://127.0.0.1:8000/v1/health
+```
+
+**VS Code — PowerShell (terminal 2):**
+
+```powershell
+curl.exe -i http://127.0.0.1:8000/v1/health
+```
+
+**Resultado esperado:** HTTP 200 com `{"status":"ok","service":"alocasenac"}`.
+
+- Interface: `http://localhost:8000/app/index.html`
+- Documentação da API: `http://localhost:8000/docs`
+- No Codespaces, abra a porta **8000** pela aba **Ports** (use o endereço encaminhado pelo Codespaces). Não exponha uma instância com contas de teste publicamente.
+
+## Passo 4 — Criar contas e recurso para demonstração
+
+O clone novo não traz usuários prontos. O script `scripts/preparar_demo.py` cria os perfis **ADMIN**, **RESPONSAVEL** e **SOLICITANTE**, uma sala restrita e seu vínculo com o Responsável. Só funciona com banco PostgreSQL cujo nome contenha `test`.
+
+**Codespaces — Bash (terminal 2, na raiz e com venv ativo):**
+
+```bash
+export DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
+python -m scripts.preparar_demo
+```
+
+**VS Code — PowerShell (terminal 2, na raiz e com venv ativo):**
 
 ```powershell
 $env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
-# Configure AUTH_SECRET_KEY com um valor local, fora do repositório.
-docker compose up -d postgres
-uvicorn app.main:app --reload
+python -m scripts.preparar_demo
 ```
 
-**Arquivos:** `docker-compose.yml`, `app/db.py`,
-`migrations/001_initial_schema.sql`,
-`migrations/002_exclusao_sobreposicao.sql`,
-`migrations/003_auditoria_imutavel.sql`.
+O script apresenta os e-mails e **senhas geradas** para as contas novas. Guarde-as somente no ambiente local de testes; **não publique senhas no GitHub nem em capturas de tela**. Em execuções futuras, as contas já existentes mantêm suas senhas e o script não as mostra novamente.
 
-**Resultado esperado:** ao iniciar em PostgreSQL, a aplicação cria o esquema
-SQLAlchemy e aplica os arquivos SQL em ordem. A execução real contra
-PostgreSQL permanece pendente; veja o
-[registro de evidências](./docs/qualidade/evidencias/README.md).
+**Observação:** o contêiner da aplicação (`docker compose up --build`) não inclui o diretório `scripts/` no `Dockerfile` atual. Para preparar dados de demonstração, use este procedimento com Python no host.
 
-## Passo 3 — Conferir modelos persistidos
+## Passo 5 — Testar os três perfis pela interface
 
-**Arquivo:** `app/models.py`.
+Acesse a URL da interface e use as credenciais exibidas no passo anterior.
 
-**Comando:**
+1. **Solicitante:** faça login, pesquise recursos e tente criar uma reserva; confira a lista de reservas.
+2. **Responsável:** faça login com outra conta e consulte as solicitações pendentes; se houver solicitação elegível, aprove/rejeite com justificativa.
+3. **Administrador:** faça login e confira cadastro de usuários, cadastro de recursos e vínculo de Responsável com recurso.
+
+As telas são separadas por perfil; uma conta não deve conseguir acessar o painel de outro perfil. Para testar um novo perfil, faça logout da sessão anterior.
+
+Se a página abrir mas o login não funcionar, confira a conta criada no **Passo 4** e o terminal da API antes de modificar o código.
+
+## Passo 6 — Conferir as tabelas e a arquitetura
+
+**Codespaces — Bash:**
+
+```bash
+python -c "from app.models import Base; print(sorted(Base.metadata.tables))"
+ls app/servicos
+```
+
+**VS Code — PowerShell:**
 
 ```powershell
 python -c "from app.models import Base; print(sorted(Base.metadata.tables))"
-```
-
-**Resultado esperado:** listagem das tabelas da aplicação, incluindo
-`users`, `resources`, `resource_scopes`, `resource_blocks`, `reservations`,
-`reservation_items`, `approvals`, `material_movements`, `notifications` e
-`audit_entries`. O [DBML](./docs/prd/modelagem-dados-sistema-academico.dbml)
-representa esses nomes físicos.
-
-## Passo 4 — Examinar regras de domínio
-
-**Arquivos:** `app/dominio/regras.py`, `app/erros.py`.
-
-**Comando:**
-
-```powershell
-python -m pytest tests/test_regras_dominio.py
-```
-
-**Resultado esperado:** verificações das regras puras de intervalo, estoque,
-exceções de domínio e transições de estado. Resultados quantitativos devem ser
-consultados somente em uma saída salva, como
-[validacao-limpeza-2026-11-11.txt](./docs/qualidade/evidencias/validacao-limpeza-2026-11-11.txt).
-
-## Passo 5 — Seguir a camada de serviços
-
-**Arquivos:** `app/servicos/reservas.py`, `aprovacoes.py`, `disponibilidade.py`,
-`materiais.py`, `auditoria.py`, `notificacoes.py`, `recursos.py`,
-`manutencao.py` e `relatorios.py`.
-
-**Comando de navegação:**
-
-```powershell
 Get-ChildItem app\servicos -File
 ```
 
-**Resultado esperado:** cada caso de uso fica na classe de serviço
-correspondente; as rotas delegam a operação e traduzem erros para respostas
-HTTP. A [RTM](./docs/qualidade/RTM.md) relaciona cada requisito aos serviços e
-testes concretos.
+**Resultado esperado:** tabelas como `users`, `resources`, `reservations`, `reservation_items`, `approvals` e `audit_entries`. A API fica em `app/api/v1.py`, as regras em `app/dominio/`, os serviços em `app/servicos/` e os modelos em `app/models.py`.
 
-## Passo 6 — Iniciar e consultar a API
+Referências: [arquitetura](./docs/prd/arquitetura.md), [modelagem de dados](./docs/prd/modelagem-dados-sistema-academico.dbml) e [RTM](./docs/qualidade/RTM.md).
 
-**Arquivos:** `app/api/v1.py`, `app/main.py`.
+## Passo 7 — Testar regras de domínio
 
-**Comandos:**
+**Codespaces — Bash:**
 
-```powershell
-uvicorn app.main:app --reload
-curl.exe http://127.0.0.1:8000/v1/health
+```bash
+python -m pytest tests/test_regras_dominio.py
 ```
 
-**Resultado esperado:** resposta de saúde da API e documentação OpenAPI em
-`/docs`. Os endpoints reais estão declarados em `app/api/v1.py`.
-
-## Passo 7 — Executar testes unitários e HTTP
-
-**Arquivos:** `tests/test_regras_dominio.py`, `tests/test_reservas.py`,
-`tests/bdd/test_api_errors.py` e demais `tests/bdd/test_*.py`.
-
-**Comando:**
+**VS Code — PowerShell:**
 
 ```powershell
+python -m pytest tests\test_regras_dominio.py
+```
+
+Esses testes exercitam regras de intervalos, disponibilidade e transições de estados. Não dependem da interface do navegador.
+
+## Passo 8 — Executar testes Python e BDD
+
+**Codespaces — Bash:**
+
+```bash
 python -m pytest
-```
-
-**Resultado esperado:** execução do conjunto padrão, que exclui o marker
-`integration` conforme `pyproject.toml`. Use a saída de execução salva antes
-de citar qualquer quantidade de testes; a
-[evidência local existente](./docs/qualidade/evidencias/validacao-limpeza-2026-11-11.txt)
-corresponde à execução registrada naquela data, não a uma execução atual.
-
-## Passo 8 — Executar BDD e verificar mapeamentos
-
-**Arquivos:** `tests/bdd/features/*.feature`,
-`tests/bdd/test_cenarios_executaveis.py`,
-`tests/bdd/test_cobertura_bdd.py`.
-
-**Comandos:**
-
-```powershell
 python -m pytest tests/bdd -o addopts=""
 python -m pytest tests/bdd/test_cobertura_bdd.py -o addopts=""
 ```
 
-**Resultado esperado:** cenários Gherkin associados a node IDs pytest reais;
-testes sem cenário devem constar em `SEM_CENARIO` com justificativa.
-
-## Ciclo TDD do handler global
-
-O caso do handler global de exceções foi desenvolvido teste primeiro:
-
-- **Vermelho:** commit `7a2b651f597a4efdefeafe0f31699394ea92c4b3`; a
-  [evidência](./docs/qualidade/evidencias/tdd-handler-vermelho.txt) registra
-  a falha do teste porque a resposta tinha `text/plain` em vez de JSON.
-- **Verde:** commit `f30349be6b99920e8842fa44338678797860cf1d`; o handler em
-  `app/main.py` registra a exceção no log e responde com mensagem genérica. A
-  [evidência](./docs/qualidade/evidencias/tdd-handler-verde.txt) registra um
-  teste aprovado.
-- **Refatoração:** não houve etapa separada; o handler permaneceu centralizado
-  em `app/main.py`.
-
-## Passo 9 — Validar concorrência em PostgreSQL
-
-**Arquivos:** `migrations/002_exclusao_sobreposicao.sql`,
-`app/servicos/reservas.py`, `tests/bdd/features/conflitos_concorrencia.feature`,
-`tests/bdd/test_cenarios_executaveis.py`,
-`tests/test_concorrencia.py`.
-
-**Comando para o cenário CT-19:**
+**VS Code — PowerShell:**
 
 ```powershell
-python -m pytest -o addopts="" -m "integration and concorrencia" "tests/bdd/test_cenarios_executaveis.py::test_processar_requisições_simultâneas_pela_mesma_sala" -v
+python -m pytest
+python -m pytest tests\bdd -o addopts=""
+python -m pytest tests\bdd\test_cobertura_bdd.py -o addopts=""
 ```
 
-**Resultado esperado:** uma requisição de sala confirmada e as demais
-recusadas com conflito. A configuração do cenário usa dez threads; a
-execução PostgreSQL está pendente e não se deve declarar esse resultado sem
-salvar a saída em `docs/qualidade/evidencias/`.
+O `pytest` padrão exclui testes marcados `integration`. O segundo comando com `-o addopts=""` pode incluir testes que exigem PostgreSQL; certifique-se de ter `DATABASE_URL` definido para o banco de teste nesse terminal. Os cenários Gherkin estão em `tests/bdd/features/`.
 
-## Passo 10 — Executar o fluxo E2E por HTTP
+## Passo 9 — Testes de integração, concorrência e E2E
 
-**Arquivo:** `tests/e2e/test_fluxo_completo.py`.
+Execute apenas com um PostgreSQL de teste acessível e variáveis de ambiente do **Passo 2** configuradas no terminal atual.
 
-**Comando:**
+**Codespaces — Bash:**
 
-```powershell
+```bash
+python -m pytest -o addopts="" -m integration
 python -m pytest tests/e2e/test_fluxo_completo.py -o addopts=""
+python -m pytest -o addopts="" -m "integration and concorrencia" tests/bdd/test_cenarios_executaveis.py -v
 ```
 
-**Resultado esperado:** fluxo de recurso, pesquisa, reserva, decisão,
-movimentação de material, conclusão e relatório, além do caso de conflito de
-sala. Os testes usam HTTP por `TestClient`; consulte a saída salva antes de
-afirmar uma execução aprovada.
+**VS Code — PowerShell:**
 
-## Passo 11 — Verificar o workflow de CI
+```powershell
+python -m pytest -o addopts="" -m integration
+python -m pytest tests\e2e\test_fluxo_completo.py -o addopts=""
+python -m pytest -o addopts="" -m "integration and concorrencia" tests\bdd\test_cenarios_executaveis.py -v
+```
 
-**Arquivo:** `.github/workflows/ci.yml`.
+O teste de concorrência CT-19 procura garantir que requisições simultâneas para a mesma sala não criem reservas conflitantes. Consulte [evidências](./docs/qualidade/evidencias/README.md) para distinguir resultados já comprovados de testes apenas implementados.
 
-**Comando local correspondente à checagem de estilo e testes:**
+## Passo 10 — Verificar estilo, cobertura Python e JavaScript
+
+**Codespaces — Bash:**
+
+```bash
+python -m ruff check .
+python -m pytest --cov=app --cov-branch --cov-fail-under=80 --cov-report=term-missing --cov-report=xml:coverage.xml
+npm ci --ignore-scripts
+npm run test:coverage
+```
+
+**VS Code — PowerShell:**
 
 ```powershell
 python -m ruff check .
-python -m pytest -o addopts="" --cov=app --cov-branch --cov-report=term-missing
+python -m pytest --cov=app --cov-branch --cov-fail-under=80 --cov-report=term-missing --cov-report=xml:coverage.xml
+npm ci --ignore-scripts
+npm run test:coverage
 ```
 
-**Resultado esperado:** jobs de qualidade, integração PostgreSQL e contêiner
-executados no GitHub Actions. O estado observado do workflow está registrado
-como aguardando execução no Pull Request em
-[evidências](./docs/qualidade/evidencias/README.md).
+Para os testes JavaScript, instale **Node.js 22**. O `npm run test:coverage` cobre `app.js` e `perfis.js` e aplica limites de 80% de linhas e 70% de branches no conjunto. O arquivo `coverage-js/lcov.info` é consumido pelo SonarCloud.
 
-## Passo 12 — Configurar SonarCloud
+## Passo 11 — Verificar CI e SonarCloud
 
-**Arquivos:** `sonar-project.properties`, `.github/workflows/ci.yml`,
-`README.md`.
+Os comandos são iguais nos dois ambientes: não há instalação local obrigatória de SonarCloud para demonstrar o sistema.
 
-**Procedimento:** crie um token de análise no SonarCloud e cadastre-o no
-repositório GitHub como segredo `SONAR_TOKEN`. Não salve o token em arquivo,
-argumento de comando ou commit.
+- [GitHub Actions — CI](https://github.com/KAYKmatheus/trbalho4na-qualidade/actions/workflows/ci.yml)
+- [Pull Request #1](https://github.com/KAYKmatheus/trbalho4na-qualidade/pull/1)
+- [Evidências finais do CI](./docs/evidencias/validacao-final-ci.md)
 
-**Resultado esperado:** o workflow executa o scan e aguarda o quality gate
-somente quando o segredo existe. A execução SonarCloud continua pendente até
-que o grupo configure o segredo e haja execução observada.
+O CI da `principal` foi aprovado para a versão `v1.0.0-rc1`; o Quality Gate do SonarCloud foi aprovado no PR #1. Os segredos `SONAR_TOKEN` e `CI_POSTGRES_PASSWORD` são exclusivos do repositório/CI e **não precisam ser obtidos pelo professor para rodar a aplicação local**.
 
-## Passo 13 — Preparar e executar desempenho
+## Passo 12 — Executar JMeter (opcional, teste de carga)
 
-**Arquivos:** `tests/desempenho/preparar_dados.py`,
-`tests/desempenho/reservas.jmx`, `.gitignore`,
-`docs/qualidade/desempenho.md`.
+**Não é necessário executar o JMeter para abrir e demonstrar o AlocaSenac.** O teste existente com 100 usuários registrou 30,75% de erros; portanto, as metas de desempenho **não foram atingidas**.
 
-**Comandos:**
+Primeiro, prepare dados específicos do cenário no banco de teste:
+
+**Codespaces — Bash:**
+
+```bash
+export DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
+python tests/desempenho/preparar_dados.py
+jmeter -n -t tests/desempenho/reservas.jmx -Jhost=localhost -Jport=8000 -Jthreads=100 -Jrampup=30 -Jduration=300 -JdataFile=tests/desempenho/reservas.csv -l tests/desempenho/resultados.jtl -e -o tests/desempenho/relatorio-jmeter
+```
+
+**VS Code — PowerShell:**
 
 ```powershell
-python tests/desempenho/preparar_dados.py
-jmeter -n -t tests/desempenho/reservas.jmx `
-  -Jhost=localhost -Jport=8000 `
-  -Jthreads=100 -Jrampup=30 -Jduration=300 `
-  -JdataFile=tests/desempenho/reservas.csv `
-  -l tests/desempenho/resultados.jtl `
-  -e -o tests/desempenho/relatorio-jmeter
+$env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
+python tests\desempenho\preparar_dados.py
+jmeter -n -t tests\desempenho\reservas.jmx -Jhost=localhost -Jport=8000 -Jthreads=100 -Jrampup=30 -Jduration=300 -JdataFile=tests\desempenho\reservas.csv -l tests\desempenho\resultados.jtl -e -o tests\desempenho\relatorio-jmeter
 ```
 
-O script exige `DATABASE_URL` apontando para um banco PostgreSQL de teste; o
-CSV gerado contém credenciais e é ignorado pelo Git. **Resultado esperado:**
-relatório JMeter com latências e erros por operação. Não há medição salva no
-repositório; p95 e taxa de erro permanecem pendentes conforme
-[desempenho.md](./docs/qualidade/desempenho.md).
+Requer Apache JMeter instalado (5.6.3+) e Java 17. **Nunca execute carga contra produção.** O CSV contém credenciais de teste e não deve ser versionado. Consulte [plano e resultados](./docs/qualidade/desempenho.md).
 
-## Passo 14 — Abrir a interface web
+## Passo 13 — Encerrar o ambiente de demonstração
 
-**Arquivos:** `app/web/static/index.html`, `buscar.html`, `reservar.html`,
-`minhas.html`, `estilo.css`, `app.js`.
+No terminal da API, pressione `Ctrl+C`. Em outro terminal, na raiz do projeto:
 
-**Comando/URL:**
+**Codespaces — Bash:**
 
-```text
-http://localhost:8000/app/index.html
+```bash
+docker compose stop postgres
 ```
 
-**Resultado esperado:** login, busca, envio de reserva e listagem/cancelamento
-das próprias reservas usando as rotas existentes. A responsividade e o uso
-somente por teclado ainda precisam da execução manual do
-[checklist CT-34](./docs/qualidade/evidencias/ct-34-checklist.md).
+**VS Code — PowerShell:**
 
-## Referências
+```powershell
+docker compose stop postgres
+```
 
-- [Requisitos funcionais e regras de negócio](./docs/prd/requisitos-funcionais-sistema-academico.md)
-- [Requisitos não funcionais](./docs/prd/requisitos-nao-funcionais-sistema-academico.md)
-- [Matriz de rastreabilidade RTM](./docs/qualidade/RTM.md)
+**Não use `docker compose down -v` sem necessidade:** o `-v` remove volumes e pode apagar os dados da demonstração.
+
+## Dúvidas frequentes
+
+| Sintoma | Causa provável / ação |
+|---|---|
+| `Connection refused` na porta 5432 | PostgreSQL não está rodando: `docker compose up -d postgres` e `docker compose ps` |
+| `Cannot connect to the Docker daemon` | Docker Desktop parado ou daemon indisponível no Codespace |
+| Porta 5432 já em uso | Outra instalação usa a porta; confira antes de alterar o Compose |
+| PowerShell bloqueia `Activate.ps1` | Usar política `Process` temporária ou chamar Python do venv diretamente |
+| `uvicorn: command not found` | Ambiente virtual não ativo ou dependências não instaladas; use `python -m uvicorn ...` |
+| Login sem usuários | Execute `python -m scripts.preparar_demo` com `DATABASE_URL` do banco de teste |
+| Rodou script de demonstração novamente, mas não apareceu senha | Usuários já existiam; o script preserva as credenciais anteriores |
+| A página não abre no Codespaces | Verifique a aba `Ports` e abra a URL encaminhada da porta 8000 |
+| Erro ao chamar a API em outro terminal | Repita as variáveis de ambiente do banco nesse terminal |
+
+## Fontes internas e escopo
+
+- [README](./README.md)
+- [Requisitos funcionais](./docs/prd/requisitos-funcionais-sistema-academico.md)
+- [Arquitetura](./docs/prd/arquitetura.md)
+- [Casos de teste](./docs/qualidade/casos-de-teste.md)
 - [Relatório final](./docs/relatorio-final.md)
-- [Defeitos confirmados](./docs/qualidade/defeitos.md)
+- [Limitações de desempenho](./docs/qualidade/desempenho.md)
+
+**Nota:** este guia separa reprodução da aplicação de testes avançados. A instalação limpa e os comandos específicos dos dois ambientes devem ser testados na prática antes de afirmar compatibilidade integral.

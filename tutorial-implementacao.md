@@ -61,29 +61,41 @@ Caso a política do PowerShell bloqueie `Activate.ps1`, execute `Set-ExecutionPo
 
 **Resultado esperado:** dependências instaladas no ambiente virtual. Python 3.12 é a versão usada no CI; o projeto exige pelo menos Python 3.11.
 
-## Passo 2 — Iniciar o PostgreSQL, configurar variáveis e migrar o banco
+## Passo 2 — Configurar variáveis, iniciar PostgreSQL e aplicar migrações
 
 O arquivo `docker-compose.yml` cria um PostgreSQL de demonstração chamado `alocasenac_test`. Neste tutorial, a API é executada **fora** do contêiner, no terminal do VS Code/Codespaces; por isso a URL aponta para `localhost:5432`.
+
+**Atenção à ordem:** o Compose exige `AUTH_SECRET_KEY` ao interpretar o arquivo, **mesmo quando o comando inicia somente o serviço `postgres`**. Portanto, configure essa variável *antes* de executar `docker compose up -d postgres`. Caso contrário, o banco não inicia e o Uvicorn apresenta `Connection refused`.
 
 **Codespaces — Bash (terminal 1):**
 
 ```bash
-docker compose up -d postgres
-docker compose ps
+# 1. Configurar as variáveis neste terminal
 export DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
 export AUTH_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
 export APP_ENV="development"
+
+# 2. Iniciar o banco e conferir se está saudável
+docker compose up -d postgres
+docker compose ps
+
+# 3. Somente depois de o PostgreSQL estar healthy, iniciar a API
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 **VS Code — PowerShell (terminal 1):**
 
 ```powershell
+# 1. Configurar as variáveis neste terminal
+$env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
+$env:AUTH_SECRET_KEY = python -c "import secrets; print(secrets.token_urlsafe(32))"
+$env:APP_ENV = "development"
+
+# 2. Iniciar o banco e conferir se está saudável
 docker compose up -d postgres
 docker compose ps
-$env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
-$env:AUTH_SECRET_KEY = py -3.12 -c "import secrets; print(secrets.token_urlsafe(32))"
-$env:APP_ENV = "development"
+
+# 3. Somente depois de o PostgreSQL estar healthy, iniciar a API
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 

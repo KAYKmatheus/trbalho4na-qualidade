@@ -277,13 +277,17 @@ O CI da `principal` foi aprovado para a versão `v1.0.0-rc1`; o Quality Gate do 
 
 **Não é necessário executar o JMeter para abrir e demonstrar o AlocaSenac.** O teste existente com 100 usuários registrou 30,75% de erros; portanto, as metas de desempenho **não foram atingidas**.
 
+**Pré-requisito obrigatório:** o Apache JMeter não é instalado com as dependências Python e normalmente não vem no Codespaces. Instale JMeter 5.6.3 (download oficial: https://jmeter.apache.org/download_jmeter.cgi) e Java 17, confira `java -version` e `jmeter --version` antes de executar os comandos abaixo. Em Codespaces/Linux, extraia o pacote oficial e utilize o caminho completo, por exemplo `/tmp/apache-jmeter-5.6.3/bin/jmeter` no lugar de `jmeter` se não estiver no PATH. No Windows, execute `C:\\ferramentas\\apache-jmeter-5.6.3\\bin\\jmeter.bat` (ajustando para a pasta em que o programa foi extraído). Consulte a página oficial para verificar o checksum do download.
+
+**Correção do erro `ModuleNotFoundError: No module named 'app'`:** execute o preparo como módulo a partir da raiz do repositório, usando `python -m tests.desempenho.preparar_dados`. Confirme que o preparo terminou e que `tests/desempenho/reservas.csv` foi gerado **antes** de iniciar o JMeter.
+
 Primeiro, prepare dados específicos do cenário no banco de teste:
 
 **Codespaces — Bash:**
 
 ```bash
 export DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
-python tests/desempenho/preparar_dados.py
+python -m tests.desempenho.preparar_dados
 jmeter -n -t tests/desempenho/reservas.jmx -Jhost=localhost -Jport=8000 -Jthreads=100 -Jrampup=30 -Jduration=300 -JdataFile=tests/desempenho/reservas.csv -l tests/desempenho/resultados.jtl -e -o tests/desempenho/relatorio-jmeter
 ```
 
@@ -291,11 +295,11 @@ jmeter -n -t tests/desempenho/reservas.jmx -Jhost=localhost -Jport=8000 -Jthread
 
 ```powershell
 $env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
-python tests\desempenho\preparar_dados.py
+python -m tests.desempenho.preparar_dados
 jmeter -n -t tests\desempenho\reservas.jmx -Jhost=localhost -Jport=8000 -Jthreads=100 -Jrampup=30 -Jduration=300 -JdataFile=tests\desempenho\reservas.csv -l tests\desempenho\resultados.jtl -e -o tests\desempenho\relatorio-jmeter
 ```
 
-Requer Apache JMeter instalado (5.6.3+) e Java 17. **Nunca execute carga contra produção.** O CSV contém credenciais de teste e não deve ser versionado. Consulte [plano e resultados](./docs/qualidade/desempenho.md).
+Requer Apache JMeter instalado (5.6.3+) e Java 17. Para novas execuções, escolha nomes diferentes para o arquivo JTL e o diretório HTML, pois o JMeter não aceita reutilizar uma pasta de relatório já preenchida. **Nunca execute carga contra produção.** O CSV contém credenciais de teste e não deve ser versionado. Consulte [plano e resultados](./docs/qualidade/desempenho.md).
 
 ## Passo 13 — Encerrar o ambiente de demonstração
 

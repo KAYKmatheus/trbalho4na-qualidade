@@ -281,16 +281,28 @@ Execute a partir da **raiz do repositório**, com PostgreSQL de teste disponíve
 
 ### Codespaces — Bash
 
-**1. Verificar Java e instalar JMeter 5.6.3:**
+**1. Instalar e selecionar Java 17 e instalar JMeter 5.6.3:**
+
+O Codespaces pode ter uma versão recente do Java selecionada por padrão. O JMeter 5.6.3 inclui componentes Groovy que podem falhar com Java 25 (`Unsupported class file major version 69`). Use explicitamente o **Java 17** no terminal que executará o JMeter.
 
 ```bash
+sudo apt-get update
+sudo apt-get install -y openjdk-17-jdk
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH="$JAVA_HOME/bin:$PATH"
 java -version
 curl -fL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz -o /tmp/apache-jmeter-5.6.3.tgz
+# Antes de extrair, confira o checksum SHA-512 disponibilizado pela Apache.
+```
+
+Depois de conferir o SHA-512 do arquivo na [distribuição oficial do JMeter](https://jmeter.apache.org/download_jmeter.cgi), extraia e verifique:
+
+```bash
 tar -xzf /tmp/apache-jmeter-5.6.3.tgz -C /tmp
 /tmp/apache-jmeter-5.6.3/bin/jmeter --version
 ```
 
-Se `java -version` falhar, instale Java 17 antes de continuar. Para uma instalação verificada, confira também o checksum SHA-512 do pacote na [distribuição oficial do JMeter](https://jmeter.apache.org/download_jmeter.cgi) antes de extrair.
+A saída de `java -version` deve indicar Java 17. As variáveis `JAVA_HOME` e `PATH` são válidas no terminal atual; configure-as novamente ao abrir outro terminal. Se o Java 17 estiver instalado em um caminho diferente, localize-o com `readlink -f "$(command -v java)"` e ajuste `JAVA_HOME`.
 
 **2. Preparar os dados de teste (uma vez):**
 
@@ -309,8 +321,8 @@ Essa execução deve gerar `tests/desempenho/reservas.csv`. **Se a preparação 
   -Jhost=localhost -Jport=8000 \
   -Jthreads=100 -Jrampup=30 -Jduration=300 \
   -JdataFile=tests/desempenho/reservas.csv \
-  -l tests/desempenho/resultados.jtl \
-  -e -o tests/desempenho/relatorio-jmeter
+  -l tests/desempenho/resultados-java17.jtl \
+  -e -o tests/desempenho/relatorio-jmeter-java17
 ```
 
 Use novos caminhos para o arquivo JTL e a pasta HTML ao repetir o teste: o diretório de relatório do JMeter deve estar vazio ou não existir.
@@ -337,6 +349,8 @@ python -m tests.desempenho.preparar_dados
 ```powershell
 & $jmeter -n -t tests\desempenho\reservas.jmx -Jhost=localhost -Jport=8000 -Jthreads=100 -Jrampup=30 -Jduration=300 -JdataFile=tests\desempenho\reservas.csv -l tests\desempenho\resultados.jtl -e -o tests\desempenho\relatorio-jmeter
 ```
+
+**Se aparecer `Unsupported class file major version 69`:** a versão ativa do Java provavelmente é 25, incompatível com o Groovy usado nesse cenário do JMeter 5.6.3. No Codespaces, volte ao terminal e execute `export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64`, `export PATH="$JAVA_HOME/bin:$PATH"` e `java -version` antes de iniciar o JMeter novamente. No Windows, configure `JAVA_HOME` para a pasta do JDK 17 e coloque `$env:JAVA_HOME\\bin` no início do `PATH` da sessão PowerShell. Se a execução abortar com `summary = 0`, **não considere `Err: 0 (0.00%)` como sucesso**: nenhuma amostra foi coletada, e a falha ao gerar HTML pode ser consequência disso. Ao tentar novamente, use novos caminhos para JTL e relatório HTML; não é necessário recriar as contas se o CSV já foi preparado.
 
 **Erros comuns:** `ModuleNotFoundError: No module named 'app'` → executar `python -m tests.desempenho.preparar_dados` na raiz do projeto; `jmeter: command not found` → instalar JMeter e utilizar o caminho completo até o executável; pasta de relatório preenchida → escolher outro diretório de saída.
 

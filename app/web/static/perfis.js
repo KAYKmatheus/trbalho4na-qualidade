@@ -50,7 +50,7 @@ async function iniciarPainel() {
   }
 }
 
-iniciarPainel();
+void iniciarPainel();
 
 
 async function carregarPendencias() {
@@ -374,7 +374,7 @@ function iniciarAdministrador() {
     }
   }
 
-  carregarRecursosAdmin();
+  void carregarRecursosAdmin();
 }
 
 async function iniciarVinculoResponsavel() {

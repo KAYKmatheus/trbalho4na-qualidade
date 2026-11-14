@@ -2,7 +2,7 @@
   "name": "alocasenac",
   "private": true,
   "scripts": {
-    "test:coverage": "c8 --include=app/web/static/app.js --reports-dir=coverage-js --reporter=text --reporter=lcov --check-coverage --lines=80 --branches=70 node --test tests/js/app.test.js"
+    "test:coverage": "c8 --include=app/web/static/app.js --include=app/web/static/perfis.js --reports-dir=coverage-js --reporter=text --reporter=lcov --check-coverage --lines=80 --branches=70 node --test tests/js/*.test.js"
   },
   "devDependencies": {
     "c8": "9.1.0"

@@ -48,6 +48,56 @@ horário.
 - [ADR-05 — API e separação de camadas](./docs/prd/adr-05-api-e-separacao-de-camadas.md)
 - [ADR-06 — estados da reserva](./docs/prd/adr-06-estados-da-reserva.md)
 
+## Executar do zero — Codespaces ou VS Code local
+
+**Tutorial completo com todos os passos para os dois ambientes:** [tutorial-implementacao.md](./tutorial-implementacao.md).
+
+**Pré-requisitos:** Docker Compose funcionando, Python 3.12 e um terminal na raiz do repositório. No Windows, abra o Docker Desktop antes de continuar. No Codespaces, use Bash; no VS Code local no Windows, use PowerShell.
+
+**Importante:** o Docker Compose exige `AUTH_SECRET_KEY` **mesmo ao iniciar somente o PostgreSQL**. Configure-a antes de executar `docker compose`. Aguarde o banco ficar **healthy** antes de iniciar a API, para evitar erros de conexão.
+
+### GitHub Codespaces — Bash
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+
+export DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
+export AUTH_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+export APP_ENV="development"
+
+docker compose up -d --wait postgres
+docker compose ps
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### VS Code local no Windows — PowerShell
+
+Após clonar com `git clone https://github.com/KAYKmatheus/trbalho4na-qualidade.git` e entrar na pasta:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+
+$env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost:5432/alocasenac_test"
+$env:AUTH_SECRET_KEY = python -c "import secrets; print(secrets.token_urlsafe(32))"
+$env:APP_ENV = "development"
+
+docker compose up -d --wait postgres
+docker compose ps
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+O comando `docker compose ps` deve mostrar `healthy` e o Uvicorn deve apresentar `Application startup complete.`. Mantenha esse terminal aberto. Se o Compose não reconhecer `--wait`, atualize-o ou confira repetidamente `docker compose ps` e inicie a API **somente após** `healthy`.
+
+Abra a interface em [http://localhost:8000/app/index.html](http://localhost:8000/app/index.html). No Codespaces, utilize o endereço da porta 8000 na aba **Ports**. A API pode ser verificada em `http://localhost:8000/v1/health`.
+
+**Para criar contas dos três perfis:** abra **outro terminal**, ative o ambiente virtual novamente e configure `DATABASE_URL` para o mesmo banco de testes. Execute `python -m scripts.preparar_demo`. O script cria usuários ADMIN, RESPONSAVEL e SOLICITANTE com senhas de demonstração exibidas uma única vez. **Não publique essas senhas.**
+
+> Os comandos acima iniciam a API diretamente no Python e apenas o PostgreSQL no Docker. Não misture esse procedimento com `docker compose up --build` sem seguir as orientações do tutorial. As instruções estão em processo de validação em clones limpos.
+
 ## Desenvolvimento
 
 - O banco padrão da aplicação em desenvolvimento é `alocasenac`. Defina

@@ -319,7 +319,8 @@ docker compose stop postgres
 
 | Sintoma | Causa provável / ação |
 |---|---|
-| `Connection refused` na porta 5432 | PostgreSQL não está rodando: `docker compose up -d postgres` e `docker compose ps` |
+| `Connection refused` ou `server closed the connection unexpectedly` na porta 5432 | PostgreSQL ainda não estava pronto: configure `AUTH_SECRET_KEY`, execute `docker compose up -d --wait postgres` e confirme `healthy` em `docker compose ps` antes do Uvicorn |
+| `AUTH_SECRET_KEY is missing a value` | Configure `AUTH_SECRET_KEY` **antes** de qualquer comando `docker compose` neste terminal |
 | `Cannot connect to the Docker daemon` | Docker Desktop parado ou daemon indisponível no Codespace |
 | Porta 5432 já em uso | Outra instalação usa a porta; confira antes de alterar o Compose |
 | PowerShell bloqueia `Activate.ps1` | Usar política `Process` temporária ou chamar Python do venv diretamente |
